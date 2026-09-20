@@ -54,6 +54,8 @@
   .app { width: 100%; max-width: 780px; }
 
   header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
+  .pause-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--panel); border: 1px solid var(--hair); color: var(--ink-dim); font-family: inherit; font-size: 13px; padding: 7px 12px; border-radius: 8px; cursor: pointer; margin-bottom: 8px; }
+  .pause-btn:hover { border-color: var(--accent); color: var(--ink); }
   .brand h1 { font-family: 'Fraunces', serif; font-optical-sizing: auto; font-weight: 600; font-size: 34px; margin: 0; color: var(--ink); }
   .brand p { margin: 4px 0 0; font-size: 13px; color: var(--ink-faint); }
   .controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
@@ -264,6 +266,7 @@
 
   <header>
     <div class="brand">
+      <button class="pause-btn" id="pauseBtn">☰ Меню</button>
       <h1>Скоропись</h1>
     </div>
     <div class="controls">
@@ -418,6 +421,7 @@
     ru: {
       musicTitle: 'Фоновая музыка', clicksTitle: 'Звук кликов', typeSoundTitle: 'Звук печати',
       levelsBtn: 'Все уровни', prevLevel: 'Предыдущий уровень', nextLevel: 'Следующий уровень',
+      pauseBtn: '☰ Меню',
       levelWord: 'Уровень', ofWord: 'из',
       statWpm: 'симв/мин', statAcc: 'точность', statTime: 'время', statErrors: 'ошибок', statFixed: 'исправлено',
       retryBtn: 'Повторить', nextLevelBtn: 'Следующий уровень (Enter)',
@@ -453,6 +457,7 @@
     en: {
       musicTitle: 'Background music', clicksTitle: 'Click sounds', typeSoundTitle: 'Typing sound',
       levelsBtn: 'All levels', prevLevel: 'Previous level', nextLevel: 'Next level',
+      pauseBtn: '☰ Menu',
       levelWord: 'Level', ofWord: 'of',
       statWpm: 'cpm', statAcc: 'accuracy', statTime: 'time', statErrors: 'errors', statFixed: 'corrected',
       retryBtn: 'Retry', nextLevelBtn: 'Next level (Enter)',
@@ -1641,6 +1646,7 @@
     clicksBtn: document.getElementById('clicksBtn'),
     typeSoundBtn: document.getElementById('typeSoundBtn'),
     levelsBtn: document.getElementById('levelsBtn'),
+    pauseBtn: document.getElementById('pauseBtn'),
     prevBtn: document.getElementById('prevBtn'),
     nextBtn: document.getElementById('nextBtn'),
     levelNum: document.getElementById('levelNum'),
@@ -1700,6 +1706,7 @@
     el.clicksBtn.title = t('clicksTitle');
     el.typeSoundBtn.title = t('typeSoundTitle');
     el.levelsBtn.textContent = t('levelsBtn');
+    el.pauseBtn.textContent = t('pauseBtn');
     el.prevBtn.setAttribute('aria-label', t('prevLevel'));
     el.nextBtn.setAttribute('aria-label', t('nextLevel'));
     el.lblWpm.textContent = t('statWpm');
@@ -1927,10 +1934,12 @@
     return Math.round(timed / minutes);
   }
 
+  // A typo that was fixed does not count any more: accuracy looks at the text
+  // as it stands now, not at every keystroke ever made.
   function currentAccuracy() {
-    if (totalKeystrokes === 0) return 100;
-    const correct = totalKeystrokes - errorCount;
-    return Math.round((correct / totalKeystrokes) * 100);
+    const typed = Math.min(el.input.value.length, targetText.length);
+    if (typed === 0) return 100;
+    return Math.round(((typed - incorrectCount) / typed) * 100);
   }
 
   function updateStatsLive() {
@@ -1984,7 +1993,8 @@
     const typed = el.input.value;
     let fixed = 0;
     errorPositions.forEach(i => { if (typed[i] === targetText[i]) fixed++; });
-    el.resultErrors.textContent = String(errorCount);
+    // "ошибок" = только неисправленные; исправленные идут отдельным счётчиком
+    el.resultErrors.textContent = String(incorrectCount);
     el.resultFixed.textContent = String(fixed);
     el.results.classList.add('visible');
     document.body.classList.add('results-open');
@@ -2003,7 +2013,7 @@
     el.testReason.textContent = t(testRec.reason);
     el.testCpm.textContent = String(cpm);
     el.testAcc.textContent = acc + '%';
-    el.testErrors.textContent = String(errorCount);
+    el.testErrors.textContent = String(incorrectCount);
     el.testResults.classList.add('visible');
     document.body.classList.add('results-open');
     fitLayout();
@@ -2016,12 +2026,14 @@
     store.tier = tr;
     pauseStartTs = null;
     el.menuOverlay.classList.remove('visible');
+    if (musicOn) startMusic();
     loadLevel(getNextLevel(lang));
   }
 
   function startTestFromMenu() {
     pauseStartTs = null;
     el.menuOverlay.classList.remove('visible');
+    if (musicOn) startMusic();
     loadTest();
   }
 
@@ -2193,6 +2205,7 @@
     showMenuView(view || 'main');
     el.menuOverlay.classList.add('visible');
     el.input.blur();
+    stopMusic(); // тишина в меню; вернётся, когда выйдем в игру
     if (startTime && !finished && !pauseStartTs) {
       clearInterval(tickTimer);
       pauseStartTs = performance.now();
@@ -2203,6 +2216,7 @@
   // when they just dismiss the menu rather than pressing "Играть"
   function closeMenuResume() {
     el.menuOverlay.classList.remove('visible');
+    if (musicOn) startMusic();
     if (pauseStartTs !== null) {
       if (startTime && !finished) {
         startTime += performance.now() - pauseStartTs;
@@ -2216,6 +2230,7 @@
   function startFrontierLevel() {
     pauseStartTs = null;
     el.menuOverlay.classList.remove('visible');
+    if (musicOn) startMusic();
     loadLevel(getNextLevel(lang));
   }
 
@@ -2235,6 +2250,7 @@
   el.menuSettingsBtn.addEventListener('click', () => { playClick(); showMenuView('settings'); });
   el.menuBackBtn.addEventListener('click', () => { playClick(); showMenuView('main'); });
 
+  el.pauseBtn.addEventListener('click', () => { playClick(); openMenu('main'); });
   el.levelsBtn.addEventListener('click', () => { playClick(); openModal(); });
   el.modalClose.addEventListener('click', () => { playClick(); closeModal(); });
   el.modalBackdrop.addEventListener('click', (e) => { if (e.target === el.modalBackdrop) closeModal(); });
@@ -2341,7 +2357,7 @@
 
   function firstInteraction() {
     ensureAudioCtx();
-    if (musicOn && !musicNodes) startMusic();
+    if (musicOn && !musicNodes && !menuIsOpen()) startMusic();
     document.removeEventListener('pointerdown', firstInteraction);
     document.removeEventListener('keydown', firstInteraction);
   }
