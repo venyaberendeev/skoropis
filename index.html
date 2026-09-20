@@ -102,16 +102,11 @@
   .word { white-space: nowrap; }          /* never break inside a word */
   .char.sp { white-space: pre-wrap; }     /* rows may wrap at the spaces between words */
   .char.correct { color: var(--ok); }
-  .char.incorrect { color: var(--error); border-radius: 2px; }
-  /* background only on the typo just made, and always on mistyped spaces
-     (a red space has no glyph, so it needs the box to be visible) */
-  .char.incorrect.mark { background: rgba(166, 84, 62, 0.14); }
-  /* the letter just typed correctly gets a green box until the next keystroke */
-  .char.correct { border-radius: 2px; }
-  .char.correct.mark { background: rgba(63, 125, 52, 0.16); }
-  .char.current::before { content: ""; position: absolute; left: -1px; top: 2px; bottom: 2px; width: 2px; background: var(--brass-bright); animation: blink 1s step-end infinite; }
-  @media (prefers-reduced-motion: reduce) { .char.current::before { animation: none; } }
-  @keyframes blink { 0%, 55% { opacity: 1; } 56%, 100% { opacity: 0; } }
+  .char.incorrect { color: var(--error); }
+  /* the one letter to type next is highlighted; typed letters have no
+     background at all, only their colour */
+  .char.pending { background: rgba(60, 52, 40, 0.1); border-radius: 2px; }
+  /* no blinking caret: the grey highlight alone marks the next letter */
 
   .hidden-input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
   .prompt { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--ink-faint); pointer-events: none; opacity: 0; transition: opacity 0.2s ease; }
@@ -1843,7 +1838,7 @@
     } else {
       renderCharsInto(el.text, targetText);
     }
-    if (charEls.length) charEls[0].classList.add('current');
+    if (charEls.length) charEls[0].classList.add('current', 'pending');
   }
 
   function updateLevelbar() {
@@ -2110,17 +2105,17 @@
     correctLetters = 0;
     incorrectCount = 0;
     const len = Math.min(value.length, targetText.length);
-    for (let i = 0; i < charEls.length; i++) charEls[i].classList.remove('correct', 'incorrect', 'mark', 'current');
+    for (let i = 0; i < charEls.length; i++) {
+      charEls[i].classList.remove('correct', 'incorrect', 'current');
+      // only the single letter to be typed next is highlighted
+      charEls[i].classList.toggle('pending', i === Math.min(value.length, targetText.length));
+    }
     for (let i = 0; i < len; i++) {
       if (value[i] === targetText[i]) {
         charEls[i].classList.add('correct'); correctCount++;
-        if (i === len - 1 && targetText[i] !== ' ') charEls[i].classList.add('mark');
         if (targetText[i] !== ' ') correctLetters++;
       }
-      else {
-        charEls[i].classList.add('incorrect'); incorrectCount++;
-        if (i === len - 1 || targetText[i] === ' ') charEls[i].classList.add('mark');
-      }
+      else { charEls[i].classList.add('incorrect'); incorrectCount++; }
     }
     if (charEls[len]) charEls[len].classList.add('current');
     updateStatsLive();
