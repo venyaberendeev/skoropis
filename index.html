@@ -360,7 +360,6 @@
       <button class="menu-btn menu-btn-primary" id="menuPlayBtn">Играть</button>
       <button class="menu-btn" id="menuDifficultyBtn">Сложность</button>
       <button class="menu-btn" id="menuSettingsBtn">Настройки</button>
-      <button class="menu-btn" id="menuExitBtn">Выход</button>
     </div>
 
     <div class="menu-view" id="menuSettings" hidden>
@@ -401,10 +400,6 @@
       <button class="menu-btn menu-btn-quiet" id="tiersBackBtn">Назад</button>
     </div>
 
-    <div class="menu-view" id="menuExited" hidden>
-      <h2 class="menu-subtitle" id="exitedTitle">Game closed</h2>
-      <p class="menu-text" id="exitedText">If the tab did not close automatically, you can close it yourself.</p>
-    </div>
   </div>
 </div>
 
@@ -437,11 +432,10 @@
       levelPassed: 'Уровень %n пройден', finalPassed: 'Финальный текст пройден!',
       tagFinal: 'финальный текст', tagLetter: 'новая буква «%s»',
       size_short: 'короткие слова', size_longer: 'слова подлиннее', size_long: 'длинные слова',
-      menuPlay: 'Играть', menuSettings: 'Настройки', menuExit: 'Выход',
+      menuPlay: 'Играть', menuSettings: 'Настройки',
       settingsTitle: 'Настройки', settingsLangLabel: 'Язык интерфейса',
       settingsMusicLabel: 'Громкость музыки', settingsClicksLabel: 'Громкость кликов',
       backBtn: 'Назад',
-      exitedTitle: 'Игра закрыта', exitedText: 'Если вкладка не закрылась автоматически, закройте её вручную.',
       menuDifficulty: 'Сложность', difficultyTitle: 'Уровень сложности',
       difficultyText: 'Выберите сложность сами или пройдите короткий тест - мы определим ваши навыки и подскажем, с чего начать.',
       chooseSelf: 'Выбрать самому', takeTest: 'Пройти тест', tiersTitle: 'Выберите сложность',
@@ -473,11 +467,10 @@
       levelPassed: 'Level %n passed', finalPassed: 'Final text completed!',
       tagFinal: 'final text', tagLetter: 'new letter «%s»',
       size_short: 'short words', size_longer: 'longer words', size_long: 'long words',
-      menuPlay: 'Play', menuSettings: 'Settings', menuExit: 'Exit',
+      menuPlay: 'Play', menuSettings: 'Settings',
       settingsTitle: 'Settings', settingsLangLabel: 'Interface language',
       settingsMusicLabel: 'Music volume', settingsClicksLabel: 'Click volume',
       backBtn: 'Back',
-      exitedTitle: 'Game closed', exitedText: 'If the tab did not close automatically, you can close it yourself.',
       menuDifficulty: 'Difficulty', difficultyTitle: 'Difficulty',
       difficultyText: 'Pick a difficulty yourself or take a short test - we will check your skills and suggest where to start.',
       chooseSelf: 'Choose myself', takeTest: 'Take the test', tiersTitle: 'Choose difficulty',
@@ -1671,17 +1664,13 @@
     menuOverlay: document.getElementById('menuOverlay'),
     menuMain: document.getElementById('menuMain'),
     menuSettings: document.getElementById('menuSettings'),
-    menuExited: document.getElementById('menuExited'),
     menuPlayBtn: document.getElementById('menuPlayBtn'),
     menuSettingsBtn: document.getElementById('menuSettingsBtn'),
-    menuExitBtn: document.getElementById('menuExitBtn'),
     menuBackBtn: document.getElementById('menuBackBtn'),
     settingsTitle: document.getElementById('settingsTitle'),
     settingsLangLabel: document.getElementById('settingsLangLabel'),
     settingsMusicLabel: document.getElementById('settingsMusicLabel'),
     settingsClicksLabel: document.getElementById('settingsClicksLabel'),
-    exitedTitle: document.getElementById('exitedTitle'),
-    exitedText: document.getElementById('exitedText'),
     uiLangSwitch: document.getElementById('uiLangSwitch'),
     musicVolumeSlider: document.getElementById('musicVolumeSlider'),
     clicksVolumeSlider: document.getElementById('clicksVolumeSlider'),
@@ -1731,14 +1720,11 @@
     el.modalSub.textContent = t('modalSub');
     el.menuPlayBtn.textContent = t('menuPlay');
     el.menuSettingsBtn.textContent = t('menuSettings');
-    el.menuExitBtn.textContent = t('menuExit');
     el.settingsTitle.textContent = t('settingsTitle');
     el.settingsLangLabel.textContent = t('settingsLangLabel');
     el.settingsMusicLabel.textContent = t('settingsMusicLabel');
     el.settingsClicksLabel.textContent = t('settingsClicksLabel');
     el.menuBackBtn.textContent = t('backBtn');
-    el.exitedTitle.textContent = t('exitedTitle');
-    el.exitedText.textContent = t('exitedText');
     el.menuDifficultyBtn.textContent = t('menuDifficulty');
     el.difficultyTitle.textContent = t('difficultyTitle');
     el.difficultyText.textContent = t('difficultyText');
@@ -2203,7 +2189,6 @@
   function showMenuView(view) {
     el.menuMain.hidden = view !== 'main';
     el.menuSettings.hidden = view !== 'settings';
-    el.menuExited.hidden = view !== 'exited';
     el.menuDifficulty.hidden = view !== 'difficulty';
     el.menuTiers.hidden = view !== 'tiers';
     if (view === 'tiers') renderTierList();
@@ -2254,17 +2239,6 @@
   el.testStartBtn.addEventListener('click', () => { playClick(); if (testRec) startTier(testRec.tier); });
   el.menuSettingsBtn.addEventListener('click', () => { playClick(); showMenuView('settings'); });
   el.menuBackBtn.addEventListener('click', () => { playClick(); showMenuView('main'); });
-  el.menuExitBtn.addEventListener('click', () => {
-    playClick();
-    clearInterval(tickTimer);
-    pauseStartTs = null;
-    stopMusic();
-    showMenuView('exited');
-    // best effort: browsers only actually allow closing tabs/windows that
-    // script itself opened, so this silently does nothing in most cases -
-    // the "exited" screen and its message are the honest fallback for that.
-    try { window.close(); } catch (e) {}
-  });
 
   el.levelsBtn.addEventListener('click', () => { playClick(); openModal(); });
   el.modalClose.addEventListener('click', () => { playClick(); closeModal(); });
@@ -2288,7 +2262,7 @@
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       if (modalOpen()) { closeModal(); return; }
-      if (menuIsOpen()) { if (!el.menuExited.hidden) return; closeMenuResume(); }
+      if (menuIsOpen()) closeMenuResume();
       else { playClick(); openMenu('main'); }
       return;
     }
