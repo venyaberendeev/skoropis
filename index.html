@@ -1,0 +1,2405 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Скоропись - тренажёр слепой печати</title>
+<meta name="description" content="Бесплатный тренажёр слепой печати на русском и английском: 4 уровня сложности, тест навыков, экранная клавиатура с анимированными руками и оценки от 2 до 5.">
+<meta name="theme-color" content="#ede4d3">
+<meta name="robots" content="index, follow">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Скоропись - тренажёр слепой печати">
+<meta property="og:description" content="Учитесь печатать вслепую: 4 уровня сложности, тест навыков, подсказки пальцев на экранной клавиатуре.">
+<meta property="og:locale" content="ru_RU">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%276%27 fill=%27%23ede4d3%27/%3E%3Crect x=%275%27 y=%278%27 width=%2722%27 height=%2716%27 rx=%273%27 fill=%27%23e3d8c2%27 stroke=%27%236e7f52%27 stroke-width=%272%27/%3E%3Crect x=%279%27 y=%2718%27 width=%2714%27 height=%273%27 rx=%271.5%27 fill=%27%236e7f52%27/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ede4d3;
+    --panel: #e3d8c2;
+    --panel-2: #d9cbaf;
+    --hair: #c9b998;
+    --ink: #3c3428;
+    --ink-dim: #6f6350;
+    --ink-faint: #9a8d76;
+    --accent: #6e7f52;
+    --accent-bright: #86986a;
+    --accent-ink: #2c331f;
+    --brass: #b08d4f;
+    --brass-bright: #c7a361;
+    --amber: #c07a3a;
+    --error: #a6543e;
+    --ok: #3f7d34;
+    --skin: #eac6a4;
+    --skin-edge: #b48a68;
+    --focus-ring: #6e7f52;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg: #ede4d3; --ink: #3c3428; }
+  }
+  :root[data-theme="dark"] { --bg: #ede4d3; --ink: #3c3428; }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); min-height: 100vh; }
+  body {
+    display: flex; align-items: center; justify-content: center; padding: 32px 18px;
+    background-image:
+      radial-gradient(ellipse at 15% -10%, rgba(110,127,82,0.10), transparent 55%),
+      radial-gradient(ellipse at 100% 110%, rgba(166,84,62,0.06), transparent 50%);
+  }
+  .app { width: 100%; max-width: 780px; }
+
+  header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
+  .brand h1 { font-family: 'Fraunces', serif; font-optical-sizing: auto; font-weight: 600; font-size: 34px; margin: 0; color: var(--ink); }
+  .brand p { margin: 4px 0 0; font-size: 13px; color: var(--ink-faint); }
+  .controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+  .segmented { display: inline-flex; background: var(--panel); border: 1px solid var(--hair); border-radius: 8px; padding: 3px; gap: 2px; }
+  .segmented button { appearance: none; border: none; background: transparent; color: var(--ink-dim); font-family: inherit; font-size: 13px; padding: 7px 12px; border-radius: 6px; cursor: pointer; transition: background 0.15s ease, color 0.15s ease; }
+  .segmented button:hover { color: var(--ink); }
+  .segmented button.active { background: var(--accent); color: #fff; font-weight: 600; }
+
+  .icon-toggle { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: var(--panel); border: 1px solid var(--hair); border-radius: 8px; color: var(--ink-dim); cursor: pointer; font-size: 16px; transition: color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease; }
+  .icon-toggle.off { opacity: 0.45; }
+  .icon-toggle:hover { border-color: var(--accent); color: var(--ink); }
+
+  button:focus-visible, .icon-toggle:focus-visible, .hidden-input:focus-visible, .level-node:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+
+  .levels-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--panel); border: 1px solid var(--hair); color: var(--ink-dim); font-family: inherit; font-size: 13px; padding: 8px 13px; border-radius: 8px; cursor: pointer; }
+  .levels-btn:hover { border-color: var(--accent); color: var(--ink); }
+
+  .levelbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; gap: 10px; }
+  .levelbar .nav-btn { width: 32px; height: 32px; border-radius: 7px; background: var(--panel); border: 1px solid var(--hair); color: var(--ink-dim); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .levelbar .nav-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--ink); }
+  .levelbar .nav-btn:disabled { opacity: 0.35; cursor: default; }
+  .levelbar .nav-btn svg { width: 14px; height: 14px; }
+  .levelbar .info { text-align: center; }
+  .levelbar .info .num { font-family: 'Fraunces', serif; font-weight: 600; font-size: 17px; color: var(--ink); }
+  .levelbar .info .tag { font-size: 12px; color: var(--ink-faint); margin-top: 1px; }
+
+  .stats { display: flex; border-top: 1px solid var(--hair); border-bottom: 1px solid var(--hair); margin-bottom: 10px; }
+  .stat { flex: 1; padding: 13px 0; text-align: center; position: relative; }
+  .stat + .stat::before { content: ""; position: absolute; left: 0; top: 13px; bottom: 13px; width: 1px; background: var(--hair); }
+  .stat .value { font-size: 24px; font-weight: 600; color: var(--accent-ink); font-variant-numeric: tabular-nums; }
+  .stat .label { margin-top: 2px; font-size: 12px; color: var(--ink-faint); }
+
+  .progressbar { height: 4px; background: var(--panel-2); border-radius: 2px; margin-bottom: 24px; overflow: hidden; }
+  .progressbar .fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.15s ease; }
+
+  .field { position: relative; min-height: 140px; padding: 6px 2px; cursor: text; }
+  .text {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 21px; line-height: 1.9;
+    letter-spacing: 0.2px; color: var(--ink-faint); user-select: none;
+    filter: blur(0px); transition: filter 0.2s ease; text-align: center;
+  }
+  .field.blurred .text { filter: blur(3px); opacity: 0.6; }
+  .text-line { text-align: center; margin-bottom: 6px; }
+  .char { position: relative; white-space: pre; }
+  .word { white-space: nowrap; }          /* never break inside a word */
+  .char.sp { white-space: pre-wrap; }     /* rows may wrap at the spaces between words */
+  .char.correct { color: var(--ok); }
+  .char.incorrect { color: var(--error); border-radius: 2px; }
+  /* background only on the typo just made, and always on mistyped spaces
+     (a red space has no glyph, so it needs the box to be visible) */
+  .char.incorrect.mark { background: rgba(166, 84, 62, 0.14); }
+  /* the letter just typed correctly gets a green box until the next keystroke */
+  .char.correct { border-radius: 2px; }
+  .char.correct.mark { background: rgba(63, 125, 52, 0.16); }
+  .char.current::before { content: ""; position: absolute; left: -1px; top: 2px; bottom: 2px; width: 2px; background: var(--brass-bright); animation: blink 1s step-end infinite; }
+  @media (prefers-reduced-motion: reduce) { .char.current::before { animation: none; } }
+  @keyframes blink { 0%, 55% { opacity: 1; } 56%, 100% { opacity: 0; } }
+
+  .hidden-input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+  .prompt { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--ink-faint); pointer-events: none; opacity: 0; transition: opacity 0.2s ease; }
+  .prompt.visible { opacity: 1; }
+
+  .results { display: none; text-align: center; padding: 8px 0 4px; }
+  .results.visible { display: block; }
+
+  .grade-badge {
+    width: 62px; height: 62px; border-radius: 50%; margin: 0 auto 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fraunces', serif; font-weight: 600; font-size: 28px; color: #fff;
+  }
+  .grade-word { font-size: 13px; color: var(--ink-faint); margin-bottom: 12px; }
+  .grade-2 { background: var(--error); }
+  .grade-3 { background: var(--amber); }
+  .grade-4 { background: var(--brass); }
+  .grade-5 { background: var(--accent); }
+
+  .results .headline { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 600; color: var(--ink); margin-bottom: 14px; }
+  .results .secondary { display: flex; justify-content: center; gap: 26px; margin-top: 4px; flex-wrap: wrap; }
+  .results .secondary div .value { font-size: 20px; color: var(--ink); font-weight: 600; }
+  .results .secondary div .label { font-size: 12px; color: var(--ink-faint); margin-top: 2px; }
+  .sparkline { margin: 18px auto 0; display: block; }
+  .results .actions { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
+  .btn { appearance: none; border: none; font-family: inherit; font-size: 13px; padding: 10px 18px; border-radius: 8px; cursor: pointer; }
+  .btn-primary { background: var(--accent); color: #fff; font-weight: 600; }
+  .btn-primary:hover { background: var(--accent-bright); }
+  .btn-ghost { background: var(--panel); color: var(--ink-dim); border: 1px solid var(--hair); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--ink); }
+
+  /* ---------- keyboard ---------- */
+  .keyboard { margin-top: 22px; user-select: none; position: relative; }
+  .key { border-bottom-width: 3px !important; }
+  .key.pressed { transform: translateY(2px); filter: brightness(0.9); }
+
+  /* ---------- animated hands ---------- */
+  .hands { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+  .hands .hand { opacity: 0.58; }
+  .hands .palm { fill: var(--skin); stroke: var(--skin); stroke-linejoin: round; }
+  .hands .palm-edge { fill: var(--skin-edge); stroke: var(--skin-edge); stroke-linejoin: round; }
+  .hands .finger { stroke: var(--skin); stroke-linecap: round; }
+  .hands .finger-edge { stroke: var(--skin-edge); stroke-linecap: round; }
+  .hands .nail { stroke: #fff; stroke-width: 1.5; }
+  /* the fingertip aiming at a key goes see-through so the key stays readable */
+  .hands .reach { opacity: 0.4; }
+  .kb-row { display: flex; justify-content: center; gap: var(--key-gap, 5px); margin-bottom: var(--key-gap, 5px); }
+  .key {
+    min-width: var(--key-size, 32px); height: var(--key-size, 32px); flex: 0 0 auto; display: flex; align-items: center; justify-content: center;
+    background: var(--panel); border: 1px solid var(--hair); border-bottom-width: 2px; border-radius: 6px;
+    font-size: var(--key-font, 12px); color: var(--ink-dim); transition: background 0.1s ease, color 0.1s ease, transform 0.1s ease;
+  }
+  .key.wide { min-width: calc(var(--key-size, 32px) * 1.7); font-size: calc(var(--key-font, 12px) * 0.82); }
+  .key.space-half { flex: 0 0 auto; width: calc(var(--key-size, 32px) * 3.3); font-size: calc(var(--key-font, 12px) * 0.82); }
+  .key.active { background: var(--accent); color: #fff; border-color: var(--accent); transform: translateY(1px); }
+
+  /* short windows: trim the fixed chrome so text + keyboard still fit */
+  /* the keyboard is useless while the results are on screen - hide it so
+     the results always fit without scrolling */
+  body.results-open .keyboard { display: none; }
+  body.compact { padding: 10px 18px; }
+  body.compact header { margin-bottom: 10px; }
+  body.compact .levelbar { margin-bottom: 8px; }
+  body.compact .stats .stat { padding: 7px 0; }
+  body.compact .progressbar { margin-bottom: 12px; }
+  body.compact .field { min-height: 0; }
+  body.compact .keyboard { margin-top: 10px; }
+
+  footer { display: flex; justify-content: center; margin-top: 22px; }
+  .icon-btn { appearance: none; display: inline-flex; align-items: center; gap: 8px; background: var(--panel); border: 1px solid var(--hair); color: var(--ink-dim); font-family: inherit; font-size: 13px; padding: 9px 16px; border-radius: 8px; cursor: pointer; }
+  .icon-btn:hover { border-color: var(--accent); color: var(--ink); }
+  .icon-btn svg { width: 14px; height: 14px; }
+
+  /* ---------- modal / level path ---------- */
+  .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(60, 52, 40, 0.35); align-items: center; justify-content: center; padding: 24px; z-index: 10; }
+  .modal-backdrop.visible { display: flex; }
+  .modal { background: var(--bg); border: 1px solid var(--hair); border-radius: 12px; padding: 22px; max-width: 420px; width: 100%; max-height: 82vh; overflow-y: auto; }
+  .modal h2 { font-family: 'Fraunces', serif; font-size: 20px; margin: 0 0 4px; color: var(--ink); }
+  .modal .sub { font-size: 12px; color: var(--ink-faint); margin-bottom: 10px; }
+  .modal .close { float: right; background: none; border: none; font-size: 18px; color: var(--ink-faint); cursor: pointer; }
+
+  .level-path { position: relative; margin-top: 14px; }
+  .level-path::before { content: ""; position: absolute; top: 25px; bottom: 25px; left: 50%; width: 3px; background: var(--hair); transform: translateX(-50%); z-index: 0; }
+  .level-node {
+    position: absolute; left: 50%; width: 48px; height: 48px; border-radius: 50%;
+    background: var(--panel); border: 2px solid var(--hair); display: flex; align-items: center; justify-content: center;
+    font-weight: 600; color: var(--ink); cursor: pointer; z-index: 1; font-size: 15px; appearance: none; padding: 0;
+  }
+  .level-node.locked { opacity: 0.4; cursor: default; }
+  .level-node.current { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(110,127,82,0.22); }
+  .level-node .grade-dot {
+    position: absolute; bottom: -6px; right: -6px; width: 20px; height: 20px; border-radius: 50%;
+    font-size: 10px; display: flex; align-items: center; justify-content: center; color: #fff; border: 2px solid var(--bg);
+  }
+  .level-node .lock-icon { font-size: 15px; }
+
+  @media (max-width: 480px) {
+    .brand h1 { font-size: 26px; }
+    .text { font-size: 17px; line-height: 1.95; }
+    /* key sizes come from --key-* set by fitLayout() */
+    .level-node { width: 42px; height: 42px; font-size: 13px; }
+  }
+
+  /* ---------- main menu overlay ---------- */
+  .menu-overlay {
+    position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center;
+    background: var(--bg); opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity 0.7s ease, visibility 0s linear 0.7s;
+  }
+  .menu-overlay.visible {
+    opacity: 1; visibility: visible; pointer-events: auto;
+    transition: opacity 0.7s ease, visibility 0s linear 0s;
+  }
+  .menu-panel {
+    width: 100%; max-width: 340px; padding: 24px; text-align: center;
+    transform: scale(0.96); transition: transform 0.7s ease;
+  }
+  .menu-overlay.visible .menu-panel { transform: scale(1); }
+  .menu-view[hidden] { display: none; }
+  .menu-title { font-family: 'Fraunces', serif; font-weight: 600; font-size: 38px; margin: 0 0 32px; color: var(--ink); }
+  .menu-subtitle { font-family: 'Fraunces', serif; font-weight: 600; font-size: 22px; margin: 0 0 22px; color: var(--ink); }
+  .menu-text { font-size: 14px; color: var(--ink-faint); margin-bottom: 24px; }
+  .menu-btn {
+    display: block; width: 100%; appearance: none; border: 1px solid var(--hair); background: var(--panel);
+    color: var(--ink); font-family: inherit; font-size: 15px; padding: 13px 18px; border-radius: 10px;
+    cursor: pointer; margin-bottom: 12px; transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .menu-btn:hover { border-color: var(--accent); }
+  .menu-btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
+  .menu-btn-primary:hover { background: var(--accent-bright); }
+  .menu-btn-quiet { background: transparent; border-color: transparent; color: var(--ink-faint); }
+  .menu-btn-quiet:hover { color: var(--ink); border-color: var(--hair); }
+
+  .settings-row { text-align: left; margin-bottom: 20px; }
+  .settings-label { font-size: 13px; color: var(--ink-dim); margin-bottom: 8px; }
+  .volume-slider {
+    width: 100%; accent-color: var(--accent); cursor: pointer;
+  }
+
+  /* ---------- difficulty tiers & skill test ---------- */
+  .tier-btn { text-align: left; padding: 12px 16px; }
+  .tier-btn .tier-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .tier-btn .tier-name { font-family: 'Fraunces', serif; font-weight: 600; font-size: 17px; }
+  .tier-btn .tier-meta { font-size: 12px; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+  .tier-btn .tier-desc { display: block; font-size: 12px; color: var(--ink-dim); margin-top: 4px; line-height: 1.4; }
+  .tier-btn.active { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(110,127,82,0.22); }
+  .tier-badge { display: inline-block; font-size: 10px; background: var(--brass); color: #fff; border-radius: 4px; padding: 1px 6px; margin-left: 6px; vertical-align: middle; font-family: 'IBM Plex Mono', monospace; font-weight: 600; }
+  .rec-tier { font-family: 'Fraunces', serif; font-weight: 600; font-size: 32px; color: var(--accent-ink); margin: 2px 0 6px; }
+  #testReason { max-width: 440px; margin-left: auto; margin-right: auto; }
+  .results .actions { flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="brand">
+      <h1>Скоропись</h1>
+    </div>
+    <div class="controls">
+      <div class="segmented" id="langSwitch" role="group" aria-label="Язык текста">
+        <button data-lang="ru" class="active">RU</button>
+        <button data-lang="en">EN</button>
+      </div>
+      <button class="icon-toggle" id="musicBtn" title="Фоновая музыка" aria-pressed="true">♪</button>
+      <button class="icon-toggle" id="clicksBtn" title="Звук кликов" aria-pressed="true">◎</button>
+      <button class="icon-toggle" id="typeSoundBtn" title="Звук печати" aria-pressed="true">⌨</button>
+      <button class="levels-btn" id="levelsBtn">Все уровни</button>
+    </div>
+  </header>
+
+  <div class="levelbar">
+    <button class="nav-btn" id="prevBtn" aria-label="Предыдущий уровень">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    </button>
+    <div class="info">
+      <div class="num" id="levelNum">Уровень 1 из 50</div>
+      <div class="tag" id="levelTag">новая буква</div>
+    </div>
+    <button class="nav-btn" id="nextBtn" aria-label="Следующий уровень">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+    </button>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="value" id="statWpm">0</div><div class="label" id="lblWpm">симв/мин</div></div>
+    <div class="stat"><div class="value" id="statAcc">100%</div><div class="label" id="lblAcc">точность</div></div>
+    <div class="stat"><div class="value" id="statTime">0с</div><div class="label" id="lblTime">время</div></div>
+  </div>
+  <div class="progressbar"><div class="fill" id="progressFill"></div></div>
+
+  <div class="field" id="field">
+    <div class="text" id="text" aria-hidden="true"></div>
+    <input class="hidden-input" id="hiddenInput" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Поле для печати">
+
+    <div class="results" id="results">
+      <div class="grade-badge" id="gradeBadge">5</div>
+      <div class="grade-word" id="gradeWord">отлично</div>
+      <div class="headline" id="resultHeadline">Уровень пройден</div>
+      <div class="secondary">
+        <div><div class="value" id="resultWpm">0</div><div class="label" id="lblWpm2">симв/мин</div></div>
+        <div><div class="value" id="resultAcc">100%</div><div class="label" id="lblAcc2">точность</div></div>
+        <div><div class="value" id="resultErrors">0</div><div class="label" id="lblErrors">ошибок</div></div>
+        <div><div class="value" id="resultFixed">0</div><div class="label" id="lblFixed">исправлено</div></div>
+      </div>
+      <svg class="sparkline" id="sparkline" width="320" height="52" viewBox="0 0 320 52"></svg>
+      <div class="actions">
+        <button class="btn btn-ghost" id="retryBtn">Повторить</button>
+        <button class="btn btn-primary" id="nextLevelBtn">Следующий уровень (Enter)</button>
+      </div>
+    </div>
+
+    <div class="results" id="testResults">
+      <div class="grade-word" id="testHeadline">Рекомендуемая сложность</div>
+      <div class="rec-tier" id="testTier">Средний</div>
+      <div class="grade-word" id="testReason"></div>
+      <div class="secondary">
+        <div><div class="value" id="testCpm">0</div><div class="label" id="lblTestCpm">симв/мин</div></div>
+        <div><div class="value" id="testAcc">100%</div><div class="label" id="lblTestAcc">точность</div></div>
+        <div><div class="value" id="testErrors">0</div><div class="label" id="lblTestErrors">ошибок</div></div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-ghost" id="testRetryBtn">Пройти ещё раз</button>
+        <button class="btn btn-ghost" id="testChooseBtn">Выбрать другую</button>
+        <button class="btn btn-primary" id="testStartBtn">Начать (Enter)</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="keyboard" id="keyboard" aria-hidden="true"></div>
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal">
+    <button class="close" id="modalClose" aria-label="Закрыть">×</button>
+    <h2 id="modalTitle">Все уровни</h2>
+    <div class="sub" id="modalSub">Оценки — как в школе, от 2 до 5. Уровни открываются по порядку, пройденный можно повторять.</div>
+    <div class="level-path" id="levelPath"></div>
+  </div>
+</div>
+
+<div class="menu-overlay" id="menuOverlay">
+  <div class="menu-panel">
+    <div class="menu-view" id="menuMain">
+      <h1 class="menu-title">Скоропись</h1>
+      <button class="menu-btn menu-btn-primary" id="menuPlayBtn">Играть</button>
+      <button class="menu-btn" id="menuDifficultyBtn">Сложность</button>
+      <button class="menu-btn" id="menuSettingsBtn">Настройки</button>
+      <button class="menu-btn" id="menuExitBtn">Выход</button>
+    </div>
+
+    <div class="menu-view" id="menuSettings" hidden>
+      <h2 class="menu-subtitle" id="settingsTitle">Настройки</h2>
+
+      <div class="settings-row">
+        <div class="settings-label" id="settingsLangLabel">Язык интерфейса</div>
+        <div class="segmented" id="uiLangSwitch" role="group" aria-label="Язык интерфейса">
+          <button data-uilang="ru">Русский</button>
+          <button data-uilang="en" class="active">English</button>
+        </div>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-label" id="settingsMusicLabel">Громкость музыки</div>
+        <input type="range" class="volume-slider" id="musicVolumeSlider" min="0" max="100" value="100">
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-label" id="settingsClicksLabel">Громкость кликов</div>
+        <input type="range" class="volume-slider" id="clicksVolumeSlider" min="0" max="100" value="100">
+      </div>
+
+      <button class="menu-btn menu-btn-quiet" id="menuBackBtn">Назад</button>
+    </div>
+
+    <div class="menu-view" id="menuDifficulty" hidden>
+      <h2 class="menu-subtitle" id="difficultyTitle">Уровень сложности</h2>
+      <p class="menu-text" id="difficultyText">Выберите сложность сами или пройдите короткий тест - мы определим ваши навыки и подскажем, с чего начать.</p>
+      <button class="menu-btn menu-btn-primary" id="chooseSelfBtn">Выбрать самому</button>
+      <button class="menu-btn" id="takeTestBtn">Пройти тест</button>
+      <button class="menu-btn menu-btn-quiet" id="difficultyBackBtn">Назад</button>
+    </div>
+
+    <div class="menu-view" id="menuTiers" hidden>
+      <h2 class="menu-subtitle" id="tiersTitle">Выберите сложность</h2>
+      <div id="tierList"></div>
+      <button class="menu-btn menu-btn-quiet" id="tiersBackBtn">Назад</button>
+    </div>
+
+    <div class="menu-view" id="menuExited" hidden>
+      <h2 class="menu-subtitle" id="exitedTitle">Game closed</h2>
+      <p class="menu-text" id="exitedText">If the tab did not close automatically, you can close it yourself.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  // difficulty tiers: each has its own level count and its own progress
+  const TIERS = {
+    novice: { levels: 75 },
+    medium: { levels: 50 },
+    hard:   { levels: 40 },
+    expert: { levels: 30 }
+  };
+  const TIER_ORDER = ['novice', 'medium', 'hard', 'expert'];
+  let tier = 'novice';
+  let totalLevels = TIERS.novice.levels; // of the current tier
+  const LETTER_PHASE = 16;
+
+  // ---------- interface translations ----------
+  let uiLang = 'en';
+  const TRANSLATIONS = {
+    ru: {
+      musicTitle: 'Фоновая музыка', clicksTitle: 'Звук кликов', typeSoundTitle: 'Звук печати',
+      levelsBtn: 'Все уровни', prevLevel: 'Предыдущий уровень', nextLevel: 'Следующий уровень',
+      levelWord: 'Уровень', ofWord: 'из',
+      statWpm: 'симв/мин', statAcc: 'точность', statTime: 'время', statErrors: 'ошибок', statFixed: 'исправлено',
+      retryBtn: 'Повторить', nextLevelBtn: 'Следующий уровень (Enter)',
+      modalTitle: 'Все уровни',
+      modalSub: 'Оценки — как в школе, от 2 до 5. Уровни открываются по порядку, пройденный можно повторять.',
+      grade5: 'отлично', grade4: 'хорошо', grade3: 'удовлетворительно', grade2: 'неудовлетворительно',
+      levelPassed: 'Уровень %n пройден', finalPassed: 'Финальный текст пройден!',
+      tagFinal: 'финальный текст', tagLetter: 'новая буква «%s»',
+      size_short: 'короткие слова', size_longer: 'слова подлиннее', size_long: 'длинные слова',
+      menuPlay: 'Играть', menuSettings: 'Настройки', menuExit: 'Выход',
+      settingsTitle: 'Настройки', settingsLangLabel: 'Язык интерфейса',
+      settingsMusicLabel: 'Громкость музыки', settingsClicksLabel: 'Громкость кликов',
+      backBtn: 'Назад',
+      exitedTitle: 'Игра закрыта', exitedText: 'Если вкладка не закрылась автоматически, закройте её вручную.',
+      menuDifficulty: 'Сложность', difficultyTitle: 'Уровень сложности',
+      difficultyText: 'Выберите сложность сами или пройдите короткий тест - мы определим ваши навыки и подскажем, с чего начать.',
+      chooseSelf: 'Выбрать самому', takeTest: 'Пройти тест', tiersTitle: 'Выберите сложность',
+      tier_novice: 'Новичок', tier_medium: 'Средний', tier_hard: 'Сложный', tier_expert: 'Эксперт',
+      tierDesc_novice: 'Буквы по одной, затем повторы слов. Для тех, кто только учится.',
+      tierDesc_medium: 'Разные слова вперемешку, короткие фразы с заглавными буквами и точками.',
+      tierDesc_hard: 'Полные предложения, все знаки препинания и цифры.',
+      tierDesc_expert: 'Длинные абзацы со спецсимволами. Для «пятёрки» - 100% точность.',
+      recommended: 'рекомендуем',
+      testLevel: 'Тест навыков', testTag: 'напечатайте текст - мы подберём сложность',
+      testHeadline: 'Рекомендуемая сложность', testRetry: 'Пройти ещё раз', testChoose: 'Выбрать другую', testStart: 'Начать (Enter)',
+      reason_novice: 'Начните с основ: поставим пальцы и выучим клавиши по одной.',
+      reason_medium: 'Клавиши вы знаете - пора набирать живые слова и фразы.',
+      reason_medium_special: 'Скорость хорошая, но заглавные буквы, цифры и знаки пока даются с ошибками - отработаем их.',
+      reason_hard: 'Уверенный набор. Дальше - сложные предложения, знаки и цифры.',
+      reason_expert: 'Быстро и точно! Вам по силам самые трудные тексты.',
+      tag_words: 'разные слова', tag_phrases: 'короткие фразы', tag_sentences: 'предложения',
+      tag_numbers: 'предложения с цифрами', tag_paragraphs: 'абзацы со спецсимволами'
+    },
+    en: {
+      musicTitle: 'Background music', clicksTitle: 'Click sounds', typeSoundTitle: 'Typing sound',
+      levelsBtn: 'All levels', prevLevel: 'Previous level', nextLevel: 'Next level',
+      levelWord: 'Level', ofWord: 'of',
+      statWpm: 'cpm', statAcc: 'accuracy', statTime: 'time', statErrors: 'errors', statFixed: 'corrected',
+      retryBtn: 'Retry', nextLevelBtn: 'Next level (Enter)',
+      modalTitle: 'All levels',
+      modalSub: 'Grades work like at school, from 2 to 5. Levels unlock in order; a passed level can be replayed.',
+      grade5: 'excellent', grade4: 'good', grade3: 'satisfactory', grade2: 'unsatisfactory',
+      levelPassed: 'Level %n passed', finalPassed: 'Final text completed!',
+      tagFinal: 'final text', tagLetter: 'new letter «%s»',
+      size_short: 'short words', size_longer: 'longer words', size_long: 'long words',
+      menuPlay: 'Play', menuSettings: 'Settings', menuExit: 'Exit',
+      settingsTitle: 'Settings', settingsLangLabel: 'Interface language',
+      settingsMusicLabel: 'Music volume', settingsClicksLabel: 'Click volume',
+      backBtn: 'Back',
+      exitedTitle: 'Game closed', exitedText: 'If the tab did not close automatically, you can close it yourself.',
+      menuDifficulty: 'Difficulty', difficultyTitle: 'Difficulty',
+      difficultyText: 'Pick a difficulty yourself or take a short test - we will check your skills and suggest where to start.',
+      chooseSelf: 'Choose myself', takeTest: 'Take the test', tiersTitle: 'Choose difficulty',
+      tier_novice: 'Beginner', tier_medium: 'Intermediate', tier_hard: 'Advanced', tier_expert: 'Expert',
+      tierDesc_novice: 'One letter at a time, then repeated words. For those just starting out.',
+      tierDesc_medium: 'Mixed real words, short phrases with capitals and periods.',
+      tierDesc_hard: 'Full sentences, all punctuation marks and digits.',
+      tierDesc_expert: 'Long paragraphs with special symbols. A top grade needs 100% accuracy.',
+      recommended: 'recommended',
+      testLevel: 'Skill test', testTag: 'type the text - we will pick a difficulty',
+      testHeadline: 'Recommended difficulty', testRetry: 'Retake', testChoose: 'Choose another', testStart: 'Start (Enter)',
+      reason_novice: 'Start with the basics: finger placement and learning keys one by one.',
+      reason_medium: 'You know the keys - time for real words and phrases.',
+      reason_medium_special: 'Good speed, but capitals, digits and punctuation still cause mistakes - let\'s drill them.',
+      reason_hard: 'Confident typing. Next up: complex sentences, punctuation and digits.',
+      reason_expert: 'Fast and accurate! The hardest texts are within your reach.',
+      tag_words: 'mixed words', tag_phrases: 'short phrases', tag_sentences: 'sentences',
+      tag_numbers: 'sentences with digits', tag_paragraphs: 'paragraphs with symbols'
+    }
+  };
+  function t(key) { return TRANSLATIONS[uiLang][key] || key; }
+
+  const LETTER_ORDER = {
+    ru: ['о','а','е','и','н','т','с','р','в','л','к','м','д','п','у','я'],
+    en: ['e','a','t','o','i','n','s','h','r','d','l','c','u','m','w','f']
+  };
+
+  const WORDS = {
+    ru: ["да","нет","он","она","мы","вы","кот","дом","сад","лес","путь","река","мир","дело","земля",
+        "вода","город","жизнь","день","глаз","место","работа","друг","вопрос","сила","конец","начало",
+        "образ","система","группа","страна","часть","число","линия","форма","звук","цвет","свет","тень",
+        "поле","камень","огонь","воздух","ветер","снег","дождь","солнце","луна","звезда","небо","гора",
+        "море","остров","берег","книга","письмо","бумага","стол","стул","окно","дверь","стена","пол",
+        "крыша","утро","вечер","ночь","год","месяц","неделя","час","минута","сегодня","завтра","вчера",
+        "быстро","медленно","тихо","громко","высоко","низко","далеко","близко","много","мало","новый","старый",
+        "большой","малый","хороший","плохой","тёплый","холодный","светлый","тёмный","думать","знать","видеть","слышать",
+        "говорить","писать","читать","идти","бежать","стоять","сидеть","лежать","смотреть","искать","найти","делать",
+        "строить","создавать","менять","решать","любить","хотеть","должен","нужно","можно","нельзя","человек","компьютер",
+        "путешествие","удивительный","профессия","занятие","движение","настроение","внимание","терпение","уверенность","спокойствие","возможность","способность",
+        "привычка","традиция","культура","история","природа","общество"],
+    en: ["go","do","up","he","she","we","you","cat","dog","sun","time","person","year","way","day",
+        "thing","man","world","life","hand","part","child","eye","woman","place","work","week","case","point",
+        "company","number","group","problem","fact","water","light","air","fire","earth","stone","wind","rain",
+        "snow","river","field","forest","hill","cloud","star","book","paper","table","chair","window","door",
+        "wall","floor","road","city","morning","evening","night","today","tomorrow","yesterday","always","never",
+        "often","soon","here","there","near","far","fast","slow","quiet","loud","high","low","small","large",
+        "good","bad","warm","cold","dark","new","old","think","know","see","hear","speak","write",
+        "read","walk","run","stand","sit","lie","look","search","find","make","build","create","change","solve",
+        "love","want","need","must","should","have","give","take","open","close","start","stop",
+        "begin","end","turn","move","hold","keep","simple","clear","true","false","free","full",
+        "empty","quick","calm","brave","computer","journey","wonderful","profession","attention","patience","confidence","calmness",
+        "opportunity","ability","habit","tradition","culture","history","society"]
+  };
+
+  const FIXED_TEXT = {
+    ru: "Скоропись - это не только быстрые пальцы, но и спокойный, ровный ритм дыхания. Каждый день, отведённый тренировке, делает движения увереннее, а взгляд свободнее от клавиш. Настоящая скорость рождается там, где пропадает напряжение, плечи опущены, кисти расслаблены, а мысли идут чуть впереди пальцев. Попробуйте напечатать этот текст без единой ошибки, сохраняя ровное дыхание до последней точки.",
+    en: "Fluent typing is less about fast fingers and more about a calm, steady rhythm of breath. Every session you spend practicing makes your movements surer and your eyes freer from the keys. True speed appears once tension disappears, shoulders low, wrists loose, thoughts running just a little ahead of your hands. Try typing this passage without a single mistake, keeping your breathing even until the final period."
+  };
+
+  // ---------- texts for the medium / hard / expert tiers ----------
+  // only characters that exist on the on-screen layouts are used (no « » or
+  // long dashes; RU has no "/" key), so every character can be highlighted.
+  const PHRASES = {
+    ru: ["Кот спит на окне.", "Мы идём домой.", "Солнце светит ярко.", "Ветер гонит облака.",
+      "Днём тепло, ночью холодно.", "Река течёт к морю.", "В саду растут яблоки.", "Утро началось с чая.",
+      "Дети играют во дворе.", "Птицы поют в лесу.", "Снег лежит на крыше.", "Мама читает книгу.",
+      "Город спит, горят огни.", "Поезд пришёл вовремя.", "Мы видим горы вдали.", "Дождь стучит по стеклу.",
+      "Лампа светит тепло.", "Время летит быстро.", "Друг позвонил вечером.", "На столе стоит ваза.",
+      "Тишина, покой, уют.", "Он пишет письмо другу.", "Лес шумит под ветром.", "Мы сели у костра.",
+      "Небо стало синим.", "Она любит рисовать.", "Завтра будет новый день.", "Чай остыл, но был вкусным.",
+      "Волны бьют о берег.", "Кошка ловит мышь."],
+    en: ["The cat sleeps.", "We walk home.", "The sun is bright.", "Wind moves the clouds.",
+      "Warm days, cold nights.", "The river runs to the sea.", "Apples grow in the garden.", "Morning starts with tea.",
+      "Kids play outside.", "Birds sing in the woods.", "Snow lies on the roof.", "Mom reads a book.",
+      "The city sleeps, lights glow.", "The train came on time.", "We see hills far away.", "Rain taps on the glass.",
+      "The lamp glows softly.", "Time flies fast.", "A friend called at night.", "A vase stands on the table.",
+      "Quiet, calm, and cozy.", "He writes to his friend.", "The forest hums in the wind.", "We sat by the fire.",
+      "The sky turned blue.", "She loves to draw.", "Tomorrow is a new day.", "The tea was cold, but good.",
+      "Waves hit the shore.", "The cat hunts a mouse."]
+  };
+
+  const SENTENCES = {
+    ru: ["Как быстро пролетело лето!", "Ты уже закончил работу над проектом?",
+      "В рюкзаке было всё нужное: вода, карта и фонарик.", "Одни любят горы; другие выбирают море.",
+      "Он сказал: \"Встретимся у старого моста\".", "Где-то вдали залаяла собака, и всё снова стихло.",
+      "Не спеши, но и не останавливайся.", "Почему звёзды мерцают, а планеты нет?",
+      "Библиотека открыта каждый день, кроме воскресенья.", "Мы шли долго; дорога петляла между холмами.",
+      "Какой чудесный вечер!", "Учитель спросил: \"Кто знает ответ?\"",
+      "Точность важнее скорости - скорость придёт сама.", "Вокзал был полон людей: кто-то спешил, кто-то ждал.",
+      "Если идёт дождь, возьми зонт.", "Сначала подумай, потом говори.",
+      "Кофе, книга и плед - вот идеальный вечер.", "Неужели уже полночь?",
+      "Лодка медленно отошла от причала.", "Она улыбнулась и сказала: \"Спасибо, всё отлично!\"",
+      "Ветер усилился; на море поднялись высокие волны.", "Каждое утро он пробегал по парку несколько кругов.",
+      "Что может быть лучше тёплого летнего дождя?", "Старый маяк всё ещё освещал путь кораблям.",
+      "Смелость - это не отсутствие страха, а умение идти вперёд."],
+    en: ["What a fast summer it was!", "Have you finished your project yet?",
+      "The backpack had everything: water, a map, and a flashlight.", "Some love the mountains; others choose the sea.",
+      "He said, \"Meet me at the old bridge.\"", "A dog barked far away, and then all was quiet again.",
+      "Don't rush, but don't stop either.", "Why do stars twinkle while planets don't?",
+      "The library is open every day except Sunday.", "We walked for hours; the road wound between the hills.",
+      "What a lovely evening!", "The teacher asked, \"Who knows the answer?\"",
+      "Accuracy matters more than speed - speed will come.", "The station was crowded: some hurried, some waited.",
+      "If it rains, take an umbrella.", "Think first, then speak.",
+      "Coffee, a book, and a blanket - the perfect evening.", "Is it midnight already?",
+      "The boat slowly left the pier.", "She smiled and said, \"Thanks, everything's great!\"",
+      "The wind grew stronger; tall waves rose on the sea.", "Every morning he ran a few laps around the park.",
+      "What could be better than warm summer rain?", "The old lighthouse still guided the ships.",
+      "Courage isn't the absence of fear; it's moving forward anyway."]
+  };
+
+  const NUM_SENTENCES = {
+    ru: ["Поезд отправляется в 7:45 с третьего пути.", "В классе учится 28 человек.",
+      "Гора высотой 5642 метра покрыта снегом.", "Мы проехали 350 километров за 4 часа.",
+      "Встреча назначена на 15 мая в 18:30.", "Книга вышла в 1869 году.",
+      "В коробке лежало 12 карандашей и 3 ластика.", "Температура упала до -15 градусов.",
+      "Скидка составила 20%, и цена стала 960 рублей.", "На часах было 23:59, до Нового года оставалась минута.",
+      "Дом номер 47 стоял на углу улицы.", "За 2 недели мы прочитали 5 книг.",
+      "Концерт начнётся в 19:00 и продлится 2 часа.", "В году 365 дней, а в високосном 366.",
+      "Самолёт летел на высоте 10000 метров."],
+    en: ["The train leaves at 7:45 from platform 3.", "There are 28 students in the class.",
+      "The peak is 5642 meters high and covered in snow.", "We drove 350 miles in 4 hours.",
+      "The meeting is set for May 15 at 6:30.", "The book came out in 1869.",
+      "The box held 12 pencils and 3 erasers.", "The temperature dropped to -15 degrees.",
+      "The discount was 20%, so the price became $96.", "The clock showed 11:59; one minute until the new year.",
+      "House number 47 stood on the corner.", "In 2 weeks we read 5 books.",
+      "The concert starts at 7:00 and lasts 2 hours.", "A year has 365 days, and a leap year has 366.",
+      "The plane flew at 33000 feet."]
+  };
+
+  const PARAGRAPHS = {
+    ru: ["Заказ №4817 (срочный) отправлен 12.03 в 09:40; ожидаемая доставка - через 2-3 дня. Если посылка задержится, напишите нам: мы вернём 15% стоимости.",
+      "Отчёт за квартал: выручка выросла на 18%, расходы сократились на 7%. Директор отметил: \"Это лучший результат за 5 лет!\" (данные предварительные).",
+      "Рецепт прост: 200 г муки, 2 яйца, 150 мл молока и щепотка соли. Смешайте всё (лучше венчиком), оставьте на 10 минут - и можно жарить.",
+      "Поезд №112 \"Москва - Казань\" отправляется в 22:15 с пути 4; время в дороге - 11 ч 50 мин. Пассажиров просят занять места заранее!",
+      "Формула проста: (х + у) * 2 = периметр прямоугольника. Если х = 7, а у = 3, то ответ - 20; проверьте сами.",
+      "Температура воздуха: днём +24, ночью +13. Влажность - 65%, ветер северо-западный, 4-6 метров в секунду.",
+      "Внимание: код доступа изменён! Новый пароль состоит из 8 символов (буквы и цифры); старый - недействителен с 01.09.",
+      "Список дел на завтра: 1) купить хлеб; 2) позвонить бабушке; 3) дочитать главу №7. Главное - не забыть про пункт 2!",
+      "В опросе участвовали 1250 человек: 64% выбрали \"да\", 28% - \"нет\", остальные (8%) не ответили. Итоги опубликуют в понедельник.",
+      "Библиотека на ул. Садовой, д. 15 работает с 10:00 до 20:00; выходной - понедельник. Абонемент стоит 300 руб. в год (для студентов - бесплатно)."],
+    en: ["Order #4817 (rush) shipped on 03/12 at 9:40 AM; expected delivery is 2-3 days. If it's late, email us at help@shop.com and we'll refund 15%.",
+      "Quarterly report: revenue grew 18%, costs fell 7%. The CEO said, \"This is our best result in 5 years!\" (figures are preliminary).",
+      "The recipe is simple: 200 g of flour, 2 eggs, 150 ml of milk & a pinch of salt. Mix well (a whisk helps), rest for 10 minutes, then fry.",
+      "Train #112 to Boston departs at 10:15 PM from track 4; the trip takes 11 h 50 min. Passengers should board early!",
+      "The formula is easy: (a + b) * 2 = perimeter. If a = 7 and b = 3, the answer is 20; check it yourself.",
+      "Weather today: high of 75, low of 55. Humidity is 65%, with winds from the northwest at 4-6 mph.",
+      "Attention: the access code has changed! The new password has 8 characters [letters & digits]; the old one expires on 09/01.",
+      "To-do list: 1) buy bread; 2) call Grandma; 3) finish chapter #7. The key thing is not to forget item 2!",
+      "In a poll of 1,250 people, 64% said \"yes\", 28% said \"no\", and the rest (8%) didn't answer. Results go live on Monday.",
+      "The library at 15 Garden St. is open 10 AM - 8 PM; it's closed on Mondays. A pass costs $30/year {free for students}."]
+  };
+
+  const TIER_FINAL_TEXT = {
+    medium: {
+      ru: "Хорошая привычка рождается из маленьких шагов. Сегодня вы печатаете чуть быстрее, чем вчера, а завтра пальцы сами найдут нужные клавиши. Главное - не торопиться, дышать ровно и радоваться каждому точному слову.",
+      en: "Good habits grow from small steps. Today you type a little faster than yesterday, and tomorrow your fingers will find the keys on their own. The key is not to rush, to breathe evenly, and to enjoy every accurate word."
+    },
+    hard: {
+      ru: "Вы когда-нибудь замечали, как меняется город после дождя? Улицы блестят, воздух становится свежим, а шаги звучат иначе: мягче и тише. В такие минуты хочется идти без цели - просто смотреть, слушать и запоминать. Попробуйте: 15 минут прогулки творят чудеса!",
+      en: "Have you ever noticed how a city changes after rain? The streets shine, the air turns fresh, and footsteps sound different: softer and quieter. In moments like that you want to walk with no goal - just look, listen, and remember. Try it: 15 minutes of walking works wonders!"
+    },
+    expert: {
+      ru: "Итоговое испытание №1: наберите этот текст без единой ошибки (да, это возможно!). В нём есть всё: цифры 0123456789, знаки ! ? ; : % * ( ) и даже \"кавычки\". Скорость 300+ символов в минуту при 100% точности - уровень настоящего мастера. Удачи; пальцы уже знают дорогу.",
+      en: "Final challenge #1: type this passage without a single mistake (yes, it's possible!). It has everything: digits 0123456789, symbols ! ? ; : % * ( ) & @ $ and even \"quotes\". A speed of 300+ characters per minute at 100% accuracy is true mastery. Good luck; your fingers already know the way."
+    }
+  };
+
+  // skill test: lowercase words, capitals, commas, a question, digits
+  const TEST_TEXT = {
+    ru: "Утром в парке было тихо. Мы прошли 3 круга, а потом сели на скамейку у пруда. Сколько уток там плавало? Кажется, их было 12, и все они ждали хлеба!",
+    en: "The park was quiet in the morning. We walked 3 laps, then sat on a bench by the pond. How many ducks were there? I think there were 12, and all of them wanted bread!"
+  };
+
+  const LINE_WIDTH = 46;
+  // word-wraps running text into centered rows of at most LINE_WIDTH chars
+  function wrapLines(text) {
+    const lines = [];
+    let cur = '';
+    text.split(' ').forEach(w => {
+      if (cur && cur.length + 1 + w.length > LINE_WIDTH) { lines.push(cur); cur = w; }
+      else cur = cur ? cur + ' ' + w : w;
+    });
+    if (cur) lines.push(cur);
+    return lines;
+  }
+
+  // random units (words / phrases / sentences) until the text reaches targetLen,
+  // never the same unit twice in a row
+  function buildFromUnits(units, targetLen) {
+    const out = [];
+    let len = 0, last = -1;
+    while (len < targetLen) {
+      let i;
+      do { i = Math.floor(Math.random() * units.length); } while (units.length > 1 && i === last);
+      last = i;
+      out.push(units[i]);
+      len += units[i].length + 1;
+    }
+    return out.join(' ');
+  }
+
+  function linesLevel(text, kind) {
+    const lines = wrapLines(text);
+    return { text: lines.join(' ') + ' ', lines, kind };
+  }
+
+  function generateTierLevel(tr, n, lang) {
+    if (n === TIERS[tr].levels) return linesLevel(TIER_FINAL_TEXT[tr][lang], 'final');
+    if (tr === 'medium') {
+      if (n <= 20) {
+        const maxLen = Math.min(10, 3 + Math.floor(n / 3));
+        const minLen = Math.max(2, maxLen - 3);
+        let pool = WORDS[lang].filter(w => w.length >= minLen && w.length <= maxLen);
+        if (pool.length < 5) pool = WORDS[lang];
+        return linesLevel(buildFromUnits(pool, 120 + n * 3), 'words');
+      }
+      const target = n <= 40 ? 140 + (n - 20) * 4 : 220 + (n - 40) * 5;
+      return linesLevel(buildFromUnits(PHRASES[lang], target), 'phrases');
+    }
+    if (tr === 'hard') {
+      if (n <= 15) return linesLevel(buildFromUnits(SENTENCES[lang], 200 + n * 4), 'sentences');
+      const target = n <= 30 ? 240 + (n - 15) * 4 : 320 + (n - 30) * 5;
+      return linesLevel(buildFromUnits(SENTENCES[lang].concat(NUM_SENTENCES[lang]), target), 'numbers');
+    }
+    return linesLevel(buildFromUnits(PARAGRAPHS[lang], 260 + n * 6), 'paragraphs');
+  }
+
+  // ---------- phase 1: individual letters, always exactly 4 clean lines ----------
+  // each line is either a pure repeat of one letter, or a strict, unbroken
+  // alternation of exactly two letters - never a random mix within a line,
+  // and each line uses its own pairing so the four rows look distinct
+  // (e.g. "а о а о ...", "а е а е ...", "а к а к ...", "а а а а ...").
+  function buildLetterLevelLines(n, lang) {
+    const order = LETTER_ORDER[lang];
+    const learned = order.slice(0, Math.min(n, order.length));
+    const newest = learned[learned.length - 1];
+    const lines = [];
+    const NUM_LINES = 4;
+    const pairs = 6 + Math.floor(Math.random() * 5); // 6-10 pairs
+    const reps = pairs * 2; // same token count for every line -> same length
+    for (let li = 0; li < NUM_LINES; li++) {
+      const tokens = [];
+      const soloOnly = learned.length === 1;
+      if (soloOnly || Math.random() < 0.35) {
+        for (let k = 0; k < reps; k++) tokens.push(newest);
+      } else {
+        const other = learned[Math.floor(Math.random() * (learned.length - 1))];
+        for (let k = 0; k < reps; k++) tokens.push(k % 2 === 0 ? newest : other);
+      }
+      lines.push(tokens.join(' '));
+    }
+    return lines;
+  }
+
+  // ---------- phase 2: growing word combinations, repeated ----------
+  // level 1-11 of this phase: one word repeated; 12-29: a pair of words
+  // repeated together; 30+: a triple - each level's combo is fixed once
+  // generated (see the level cache) so a Tab restart keeps the same words.
+  function buildWordComboLines(m, lang) {
+    const maxLen = Math.min(10, 3 + Math.floor(m / 6));
+    const minLen = Math.max(2, maxLen - 2);
+    const bank = WORDS[lang];
+    let pool = bank.filter(w => w.length >= minLen && w.length <= maxLen);
+    if (pool.length === 0) pool = bank;
+    const comboSize = m < 12 ? 1 : m < 30 ? 2 : 3;
+    const words = [];
+    for (let i = 0; i < comboSize; i++) words.push(pool[Math.floor(Math.random() * pool.length)]);
+    // The line is filled by WIDTH, not by a fixed number of repeats: with long
+    // words and combos of two or three, a fixed repeat count produced lines far
+    // wider than the screen, which then wrapped into a wall of text.
+    const combo = words.join(' ');
+    const reps = Math.max(1, Math.floor((LINE_WIDTH + 1) / (combo.length + 1)));
+    const NUM_LINES = 4;
+    const lines = [];
+    for (let li = 0; li < NUM_LINES; li++) lines.push(Array(reps).fill(combo).join(' '));
+    return { lines, words, maxLen };
+  }
+
+  function generateLevel(n, lang) {
+    if (tier !== 'novice') return generateTierLevel(tier, n, lang);
+    if (n === TIERS.novice.levels) return { text: FIXED_TEXT[lang], kind: 'final' };
+    if (n <= LETTER_PHASE) {
+      const order = LETTER_ORDER[lang];
+      const letter = order[Math.min(n, order.length) - 1];
+      const lines = buildLetterLevelLines(n, lang);
+      return { text: lines.join(' ') + ' ', lines, kind: 'letter', letter };
+    }
+    const m = n - LETTER_PHASE;
+    const r = buildWordComboLines(m, lang);
+    const sizeKey = r.maxLen <= 4 ? 'short' : r.maxLen <= 7 ? 'longer' : 'long';
+    return { text: r.lines.join(' ') + ' ', lines: r.lines, kind: 'combo', sizeKey, words: r.words };
+  }
+
+  // builds the localized level-bar tag text from a cached level's raw data,
+  // so switching the interface language re-translates already-cached levels
+  function tagFor(gen) {
+    if (!gen) return '';
+    if (gen.kind === 'final') return t('tagFinal');
+    if (gen.kind === 'test') return t('testTag');
+    if (gen.kind === 'letter') return t('tagLetter').replace('%s', gen.letter);
+    if (gen.kind !== 'combo') return t('tag_' + gen.kind);
+    const sizeWord = t('size_' + gen.sizeKey);
+    return sizeWord + ' «' + gen.words.join(' ') + '»';
+  }
+
+  // ---------- school-style grading (2-5) ----------
+  // speed target (characters per minute, spaces not counted) grows with the
+  // level number; harder tiers expect more speed and stricter accuracy
+  const TIER_GRADING = {
+    novice: { base: 50,  step: 2,   acc: [95, 85, 70] },
+    medium: { base: 120, step: 1.2, acc: [95, 88, 75] },
+    hard:   { base: 160, step: 1.5, acc: [96, 90, 80] },
+    expert: { base: 210, step: 2,   acc: [100, 95, 85] }
+  };
+  function gradeFor(n, cpm, acc) {
+    const g = TIER_GRADING[tier];
+    const target = g.base + n * g.step;
+    if (acc >= g.acc[0] && cpm >= target) return 5;
+    if (acc >= g.acc[1] && cpm >= target * 0.7) return 4;
+    if (acc >= g.acc[2] && cpm >= target * 0.4) return 3;
+    return 2;
+  }
+
+  // skill test -> recommended tier
+  function recommendTier(cpm, acc, specialAcc) {
+    if (acc < 85 || cpm < 90) return { tier: 'novice', reason: 'reason_novice' };
+    if (specialAcc < 80) return { tier: 'medium', reason: 'reason_medium_special' };
+    if (cpm < 160) return { tier: 'medium', reason: 'reason_medium' };
+    if (cpm < 220 || acc < 95) return { tier: 'hard', reason: 'reason_hard' };
+    return { tier: 'expert', reason: 'reason_expert' };
+  }
+  // capitals, digits and punctuation - the "hard" characters the test checks separately
+  function isSpecialChar(ch) { return ch !== ' ' && (ch !== ch.toLowerCase() || !/[a-zа-яё]/.test(ch)); }
+
+  // ---------- on-screen keyboard ----------
+  const KB_LAYOUT = {
+    ru: [
+      ['ё','1','2','3','4','5','6','7','8','9','0','-','='],
+      ['й','ц','у','к','е','н','г','ш','щ','з','х','ъ'],
+      ['ф','ы','в','а','п','р','о','л','д','ж','э'],
+      ['я','ч','с','м','и','т','ь','б','ю','.']
+    ],
+    en: [
+      ['`','1','2','3','4','5','6','7','8','9','0','-','='],
+      ['q','w','e','r','t','y','u','i','o','p','[',']'],
+      ['a','s','d','f','g','h','j','k','l',';',"'"],
+      ['z','x','c','v','b','n','m',',','.','/']
+    ]
+  };
+  // first right-hand column in each row (touch-typing finger zones)
+  const KB_HAND_SPLIT = [6, 5, 5, 5];
+  // characters typed with Shift -> the key they live on
+  const SHIFT_MAP = {
+    ru: { '!':'1', '"':'2', '№':'3', ';':'4', '%':'5', ':':'6', '?':'7', '*':'8', '(':'9', ')':'0', '_':'-', '+':'=', ',':'.' },
+    en: { '~':'`', '!':'1', '@':'2', '#':'3', '$':'4', '%':'5', '^':'6', '&':'7', '*':'8', '(':'9', ')':'0', '_':'-', '+':'=',
+          '{':'[', '}':']', ':':';', '"':"'", '<':',', '>':'.', '?':'/' }
+  };
+  let kbLang = 'ru';
+  let keyElByChar = {};
+  let keyHandByChar = {};
+  let fingerByChar = {};
+  let shiftKeyEls = { left: null, right: null };
+  let spaceKeyEls = []; // [left half, right half]
+  let kbRows = [];      // key elements per letter row
+
+  // ---------- touch-typing finger zones ----------
+  // L/R = hand, P/R/M/I/T = pinky, ring, middle, index, thumb.
+  // Each column of each row belongs to one finger (the standard scheme):
+  // e.g. pinky - Ё 1 Й Ф Я, index - 4 5 К Е А П М И, right pinky - 0 - = З Х Ъ Ж Э .
+  const FINGER_COLS = [
+    ['LP','LP','LR','LM','LI','LI','RI','RI','RM','RR','RP','RP','RP'],
+    ['LP','LR','LM','LI','LI','RI','RI','RM','RR','RP','RP','RP'],
+    ['LP','LR','LM','LI','LI','RI','RI','RM','RR','RP','RP'],
+    ['LP','LR','LM','LI','LI','RI','RI','RM','RR','RP']
+  ];
+  // home row: ФЫВА / ОЛДЖ (ASDF / JKL;) - column of each finger's resting key
+  const HOME_COL = { LP: 0, LR: 1, LM: 2, LI: 3, RI: 6, RM: 7, RR: 8, RP: 9 };
+  // same color for the same finger on both hands
+  const FINGER_TYPE_COLOR = { P: '#b8695a', R: '#c49a3e', M: '#6f9a4f', I: '#4a86a6', T: '#9a8c78' };
+  const fingerColor = f => FINGER_TYPE_COLOR[f[1]];
+
+  function buildKeyboard(lang) {
+    const kb = document.getElementById('keyboard');
+    kb.innerHTML = '';
+    keyElByChar = {};
+    keyHandByChar = {};
+    fingerByChar = {};
+    shiftKeyEls = { left: null, right: null };
+    spaceKeyEls = [];
+    kbRows = [];
+    kbLang = lang;
+    const makeShift = (side) => {
+      const shift = document.createElement('div');
+      shift.className = 'key wide';
+      shift.textContent = 'Shift';
+      shift.style.borderBottomColor = FINGER_TYPE_COLOR.P;
+      shiftKeyEls[side] = shift;
+      return shift;
+    };
+    const rows = KB_LAYOUT[lang];
+    rows.forEach((row, ri) => {
+      const rowEl = document.createElement('div');
+      rowEl.className = 'kb-row';
+      if (ri === 3) rowEl.appendChild(makeShift('left'));
+      const rowKeys = [];
+      row.forEach((label, ci) => {
+        const keyEl = document.createElement('div');
+        keyEl.className = 'key';
+        keyEl.textContent = label.toUpperCase();
+        const finger = FINGER_COLS[ri][ci];
+        keyEl.style.borderBottomColor = fingerColor(finger);
+        rowEl.appendChild(keyEl);
+        rowKeys.push(keyEl);
+        keyElByChar[label] = keyEl;
+        fingerByChar[label] = finger;
+        keyHandByChar[label] = finger[0] === 'L' ? 'left' : 'right';
+      });
+      if (ri === 3) rowEl.appendChild(makeShift('right'));
+      kbRows.push(rowKeys);
+      kb.appendChild(rowEl);
+    });
+    // spacebar split into two halves: whichever hand just typed a letter,
+    // the OPPOSITE thumb hits space next (standard touch-typing rhythm)
+    const spaceRow = document.createElement('div');
+    spaceRow.className = 'kb-row';
+    const left = document.createElement('div');
+    left.className = 'key space-half';
+    left.textContent = 'space';
+    const right = document.createElement('div');
+    right.className = 'key space-half';
+    right.textContent = 'space';
+    left.style.borderBottomColor = FINGER_TYPE_COLOR.T;
+    right.style.borderBottomColor = FINGER_TYPE_COLOR.T;
+    spaceRow.appendChild(left);
+    spaceRow.appendChild(right);
+    kb.appendChild(spaceRow);
+    spaceKeyEls = [left, right];
+    buildHands();
+    requestAnimationFrame(layoutHands);
+  }
+
+  function clearKeyboardHighlight() {
+    Object.values(keyElByChar).forEach(k => k.classList.remove('active'));
+    spaceKeyEls.forEach(k => k.classList.remove('active'));
+    Object.values(shiftKeyEls).forEach(k => k && k.classList.remove('active'));
+    setHandTargets({});
+  }
+
+  // ch: the character to type next. prevCh: the character right before it
+  // (used only when ch is a space, to pick which thumb/half should press it).
+  function highlightNextChar(ch, prevCh) {
+    clearKeyboardHighlight();
+    if (ch === undefined) return;
+    if (ch === ' ') {
+      const prevHand = prevCh !== undefined ? keyHandByChar[keyFor(prevCh).base] : undefined;
+      if (prevHand === 'left') {            // right thumb
+        spaceKeyEls[1].classList.add('active');
+        setHandTargets({ RT: spaceKeyEls[1] });
+      } else if (prevHand === 'right') {    // left thumb
+        spaceKeyEls[0].classList.add('active');
+        setHandTargets({ LT: spaceKeyEls[0] });
+      } else {
+        spaceKeyEls.forEach(k => k.classList.add('active'));
+        setHandTargets({ RT: spaceKeyEls[1] });
+      }
+      return;
+    }
+    const k = keyFor(ch);
+    const target = keyElByChar[k.base];
+    const finger = fingerByChar[k.base];
+    const assign = {};
+    if (target) {
+      target.classList.add('active');
+      if (finger) assign[finger] = target;
+    }
+    // Shift is pressed by the pinky of the OPPOSITE hand
+    if (k.shift && finger) {
+      const side = finger[0] === 'L' ? 'right' : 'left';
+      const shift = shiftKeyEls[side];
+      if (shift) {
+        shift.classList.add('active');
+        assign[side === 'left' ? 'LP' : 'RP'] = shift;
+      }
+    }
+    setHandTargets(assign);
+  }
+
+  // ---------- animated hands over the keyboard ----------
+  // Proportions follow a real hand: all lengths below are in "knuckle
+  // spacings" (the gap between two neighbouring knuckles), the usual way to
+  // measure a hand - the middle finger is 4 of them long, the little finger
+  // 2.9, the palm 4.2. A hand never stretches to reach a key: it shifts and
+  // rotates around the wrist, and the finger bends at its middle joint
+  // (two-bone inverse kinematics). The fingertip aiming at a key turns
+  // semi-transparent, so the key stays readable underneath it.
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  const HAND_FINGERS = { L: ['LP', 'LR', 'LM', 'LI', 'LT'], R: ['RP', 'RR', 'RM', 'RI', 'RT'] };
+  const FINGER_LEN = { P: 2.9, R: 3.7, M: 4.0, I: 3.7, T: 2.6 };
+  const FINGER_W = { P: 0.46, R: 0.52, M: 0.55, I: 0.54, T: 0.62 };
+  const PALM_LEN = 4.2;
+  const hands = { svg: null, els: null, geo: null, tip: {}, targetEl: {}, press: {}, pose: {}, pressedKeys: [], raf: 0, last: 0 };
+
+  function buildHands() {
+    const kb = document.getElementById('keyboard');
+    const svg = document.createElementNS(SVG_NS, 'svg');
+    svg.setAttribute('class', 'hands');
+    svg.setAttribute('aria-hidden', 'true');
+    const mk = (tag, cls, parent) => {
+      const e = document.createElementNS(SVG_NS, tag);
+      e.setAttribute('class', cls);
+      parent.appendChild(e);
+      return e;
+    };
+    hands.els = {};
+    ['L', 'R'].forEach(side => {
+      const g = mk('g', 'hand', svg);
+      // outlines first, then the skin fills over them, so palm and fingers
+      // share one clean silhouette; nails go on top
+      const palmEdge = mk('path', 'palm-edge', g);
+      const seg1edge = {}, seg2edge = {}, seg1 = {}, seg2 = {}, nails = {};
+      HAND_FINGERS[side].forEach(f => {
+        seg1edge[f] = mk('line', 'finger-edge', g);
+        seg2edge[f] = mk('line', 'finger-edge', g);
+      });
+      const palm = mk('path', 'palm', g);
+      HAND_FINGERS[side].forEach(f => {
+        seg1[f] = mk('line', 'finger', g);
+        seg2[f] = mk('line', 'finger', g);
+      });
+      HAND_FINGERS[side].forEach(f => {
+        nails[f] = mk('circle', 'nail', g);
+        nails[f].setAttribute('fill', fingerColor(f));
+      });
+      hands.els[side] = { palmEdge, palm, seg1edge, seg2edge, seg1, seg2, nails };
+    });
+    kb.appendChild(svg);
+    hands.svg = svg;
+    hands.tip = {};
+    hands.geo = null;
+  }
+
+  function layoutHands() {
+    const kb = document.getElementById('keyboard');
+    if (!hands.svg || kbRows.length < 4 || spaceKeyEls.length < 2) return;
+    kb.style.paddingBottom = '0px';
+    const r0 = kbRows[2][0].getBoundingClientRect(), r1 = kbRows[2][1].getBoundingClientRect();
+    const u = r1.left - r0.left; // key pitch
+    if (!u) return;
+    const box = kb.getBoundingClientRect();
+    const centers = new Map();
+    const c = elk => {
+      const r = elk.getBoundingClientRect();
+      const p = { x: r.left - box.left + r.width / 2, y: r.top - box.top + r.height / 2, w: r.width };
+      centers.set(elk, p);
+      return p;
+    };
+    kbRows.forEach(row => row.forEach(c));
+    Object.values(shiftKeyEls).forEach(k => k && c(k));
+    const sl = c(spaceKeyEls[0]), sr = c(spaceKeyEls[1]);
+    const s = u * 0.78; // knuckle spacing: knuckles sit a bit closer than the keys
+    const home = {};
+    Object.keys(HOME_COL).forEach(f => { home[f] = centers.get(kbRows[2][HOME_COL[f]]); });
+    home.LT = { x: sl.x + sl.w * 0.18, y: sl.y };
+    home.RT = { x: sr.x - sr.w * 0.18, y: sr.y };
+    const geo = { u, s, centers, hand: {} };
+    let lowest = 0;
+    ['L', 'R'].forEach(side => {
+      const inward = side === 'L' ? 1 : -1; // toward the middle of the keyboard
+      const [P, R, M, I, T] = HAND_FINGERS[side];
+      const xc = (home[P].x + home[R].x + home[M].x + home[I].x) / 4;
+      // resting fingers are slightly curled (88% of their length), as on a real
+      // keyboard - that is what leaves room to both stretch and curl further
+      const kY = home[M].y + FINGER_LEN.M * 0.88 * s;
+      const kn = {}, rest = {};
+      [P, R, M, I].forEach(f => {
+        kn[f] = {
+          x: xc + (home[f].x - xc) * (s / u),
+          y: kY - (FINGER_LEN.M - FINGER_LEN[f[1]]) * 0.75 * s // shorter finger, closer knuckle
+        };
+        rest[f] = home[f];
+      });
+      kn[T] = { x: kn[I].x + inward * 1.1 * s, y: kY + 1.2 * s };
+      rest[T] = home[T];
+      const wrist = { x: xc + inward * 0.1 * s, y: kY + PALM_LEN * s };
+      const out = -inward; // away from the middle of the keyboard
+      // outline: across the knuckles from the little finger to the index, then
+      // round the thumb mound, down to the wrist and back up the outer edge
+      const palm = [
+        { x: kn[P].x + out * 0.3 * s, y: kn[P].y + 0.1 * s },
+        { x: kn[R].x, y: kn[R].y - 0.12 * s },
+        { x: kn[M].x, y: kn[M].y - 0.18 * s },
+        { x: kn[I].x + inward * 0.25 * s, y: kn[I].y - 0.02 * s },
+        { x: kn[T].x + inward * 0.3 * s, y: kn[T].y + 0.45 * s },
+        { x: wrist.x + inward * 0.85 * s, y: wrist.y - 0.35 * s },
+        { x: wrist.x + inward * 0.6 * s, y: wrist.y },
+        { x: wrist.x + out * 0.75 * s, y: wrist.y },
+        { x: kn[P].x + out * 0.45 * s, y: kY + 1.7 * s }
+      ];
+      geo.hand[side] = { kn, rest, palm, wrist };
+      lowest = Math.max(lowest, wrist.y);
+      if (!hands.pose[side]) hands.pose[side] = { tx: 0, ty: 0, rot: 0 };
+    });
+    kb.style.paddingBottom = Math.max(0, Math.round(lowest - box.height + 0.25 * s)) + 'px';
+    hands.geo = geo;
+    Object.keys(home).forEach(f => { if (!hands.tip[f]) hands.tip[f] = { x: home[f].x, y: home[f].y }; });
+    renderHands();
+    kickHands();
+  }
+
+  function rotPt(p, c, a) {
+    const sn = Math.sin(a), cs = Math.cos(a), dx = p.x - c.x, dy = p.y - c.y;
+    return { x: c.x + dx * cs - dy * sn, y: c.y + dx * sn + dy * cs };
+  }
+
+  // a point of the resting hand, moved by the hand's current shift + rotation
+  function applyPose(p, side) {
+    const po = hands.pose[side];
+    const r = rotPt(p, hands.geo.hand[side].wrist, po.rot);
+    return { x: r.x + po.tx, y: r.y + po.ty };
+  }
+
+  // how the hand would move to bring the reaching finger over its key: it
+  // turns around the wrist and shifts, but only part of the way - the rest is
+  // covered by the finger straightening out
+  function desiredPose(side) {
+    const h = hands.geo.hand[side];
+    let act = null;
+    HAND_FINGERS[side].forEach(f => { if (hands.targetEl[f] && f[1] !== 'T') act = f; });
+    if (!act) return { tx: 0, ty: 0, rot: 0 };
+    const T = hands.geo.centers.get(hands.targetEl[act]) || h.rest[act];
+    const R = h.rest[act], W = h.wrist;
+    let rot = (Math.atan2(T.y - W.y, T.x - W.x) - Math.atan2(R.y - W.y, R.x - W.x)) * 0.55;
+    rot = Math.max(-0.3, Math.min(0.3, rot)); // at most ~17 degrees
+    const R2 = rotPt(R, W, rot);
+    const lim = hands.geo.u * 0.9;
+    const clamp = v => Math.max(-lim, Math.min(lim, v));
+    return { tx: clamp((T.x - R2.x) * 0.4), ty: clamp((T.y - R2.y) * 0.4), rot };
+  }
+
+  // closed outline that curves through the given points instead of cornering
+  // at them, so the palm reads as a hand and not as a polygon
+  function smoothPath(pts) {
+    const mid = (a, b) => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
+    const n = pts.length;
+    const f = p => p.x.toFixed(1) + ',' + p.y.toFixed(1);
+    let m0 = mid(pts[n - 1], pts[0]);
+    let d = 'M' + f(m0);
+    for (let i = 0; i < n; i++) {
+      const next = mid(pts[i], pts[(i + 1) % n]);
+      d += ' Q' + f(pts[i]) + ' ' + f(next);
+    }
+    return d + ' Z';
+  }
+
+  // The finger is drawn straight from the knuckle to its key: reaching simply
+  // extends it (the hand rotation above covers the rest). The split point is
+  // only where the see-through fingertip begins, not a bent joint.
+  function fingerLine(K, T, maxLen) {
+    const dx = T.x - K.x, dy = T.y - K.y;
+    const d = Math.hypot(dx, dy) || 0.001;
+    const len = Math.min(d, maxLen);
+    const tip = { x: K.x + dx / d * len, y: K.y + dy / d * len };
+    return { joint: { x: K.x + (tip.x - K.x) * 0.6, y: K.y + (tip.y - K.y) * 0.6 }, tip };
+  }
+
+  // assign: { fingerId: keyElement } - fingers not listed return to their key
+  function setHandTargets(assign) {
+    hands.targetEl = assign;
+    kickHands();
+  }
+
+  // called on every keystroke: the fingers on the current target keys dip
+  function pressHands() {
+    hands.pressedKeys.forEach(k => k.classList.remove('pressed'));
+    hands.pressedKeys = [];
+    Object.keys(hands.targetEl).forEach(f => {
+      hands.press[f] = 1;
+      const elk = hands.targetEl[f];
+      elk.classList.add('pressed');
+      hands.pressedKeys.push(elk);
+    });
+    setTimeout(() => hands.pressedKeys.forEach(k => k.classList.remove('pressed')), 110);
+    kickHands();
+  }
+
+  function kickHands() {
+    if (!hands.raf && hands.geo) {
+      hands.last = performance.now();
+      hands.raf = requestAnimationFrame(stepHands);
+    }
+  }
+
+  function stepHands(ts) {
+    hands.raf = 0;
+    if (!hands.geo) return;
+    const dt = Math.min(64, ts - hands.last);
+    hands.last = ts;
+    const k = 1 - Math.exp(-dt / 70);
+    let moving = false;
+    ['L', 'R'].forEach(side => {
+      const po = hands.pose[side], want = desiredPose(side);
+      po.tx += (want.tx - po.tx) * k;
+      po.ty += (want.ty - po.ty) * k;
+      po.rot += (want.rot - po.rot) * k;
+      if (Math.abs(want.tx - po.tx) + Math.abs(want.ty - po.ty) + Math.abs(want.rot - po.rot) * 60 > 0.3) moving = true;
+      HAND_FINGERS[side].forEach(f => {
+        const aimEl = hands.targetEl[f];
+        const aim = (aimEl && hands.geo.centers.get(aimEl)) || applyPose(hands.geo.hand[side].rest[f], side);
+        const tip = hands.tip[f];
+        tip.x += (aim.x - tip.x) * k;
+        tip.y += (aim.y - tip.y) * k;
+        if (Math.abs(aim.x - tip.x) + Math.abs(aim.y - tip.y) > 0.3) moving = true;
+        if (hands.press[f] > 0) { hands.press[f] = Math.max(0, hands.press[f] - dt / 170); moving = true; }
+      });
+    });
+    renderHands();
+    if (moving) hands.raf = requestAnimationFrame(stepHands);
+  }
+
+  function renderHands() {
+    const g = hands.geo;
+    if (!g) return;
+    const s = g.s;
+    const set = (e, a) => { for (const key in a) e.setAttribute(key, a[key]); };
+    ['L', 'R'].forEach(side => {
+      const h = g.hand[side], els = hands.els[side];
+      const d = smoothPath(h.palm.map(p => applyPose(p, side)));
+      const pw = 0.34 * s;
+      set(els.palmEdge, { d: d, 'stroke-width': pw + 3 });
+      set(els.palm, { d: d, 'stroke-width': pw });
+      HAND_FINGERS[side].forEach(f => {
+        const type = f[1];
+        const L = FINGER_LEN[type] * s;
+        const K = applyPose(h.kn[f], side);
+        const p = hands.press[f] || 0;
+        // pressing curls the finger a touch, the way a real one dips
+        const aim = { x: hands.tip[f].x, y: hands.tip[f].y + 0.12 * s * p };
+        const ik = fingerLine(K, aim, L * 1.15);
+        const w = FINGER_W[type] * s * (1 + 0.1 * p);
+        const reach = hands.targetEl[f] ? ' reach' : '';
+        const seg1 = { x1: K.x.toFixed(1), y1: K.y.toFixed(1), x2: ik.joint.x.toFixed(1), y2: ik.joint.y.toFixed(1) };
+        const seg2 = { x1: ik.joint.x.toFixed(1), y1: ik.joint.y.toFixed(1), x2: ik.tip.x.toFixed(1), y2: ik.tip.y.toFixed(1) };
+        set(els.seg1edge[f], Object.assign({ 'stroke-width': w + 3 }, seg1));
+        set(els.seg2edge[f], Object.assign({ 'stroke-width': w * 0.9 + 3 }, seg2));
+        els.seg2edge[f].setAttribute('class', 'finger-edge' + reach);
+        set(els.seg1[f], Object.assign({ 'stroke-width': w }, seg1));
+        set(els.seg2[f], Object.assign({ 'stroke-width': w * 0.9 }, seg2));
+        els.seg2[f].setAttribute('class', 'finger' + reach);
+        set(els.nails[f], { cx: ik.tip.x.toFixed(1), cy: ik.tip.y.toFixed(1), r: (0.16 * s * (1 + 0.3 * p)).toFixed(1) });
+        els.nails[f].setAttribute('class', 'nail' + reach);
+      });
+    });
+  }
+
+  window.addEventListener('resize', () => requestAnimationFrame(layoutHands));
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => requestAnimationFrame(layoutHands));
+
+  // which physical key produces ch, and whether Shift is needed
+  function keyFor(ch) {
+    const lower = ch.toLowerCase();
+    if (keyElByChar[lower]) return { base: lower, shift: ch !== lower };
+    const base = SHIFT_MAP[kbLang][ch];
+    return base ? { base, shift: true } : { base: lower, shift: false };
+  }
+
+  // ---------- audio: 5 generative relaxing ambients, rotating in order ----------
+  // Everything is synthesized in-browser (no audio files, works offline):
+  // soft pad chords, piano-like notes, FM bells, drones and filtered noise,
+  // all sent through a shared generated reverb. Notes are picked at random
+  // from calm scales, so the music never loops exactly.
+  const NOTE = m => 440 * Math.pow(2, (m - 69) / 12); // midi -> Hz
+  function rand(a, b) { return a + Math.random() * (b - a); }
+  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+  let reverbBuffer = null;
+  function getReverbBuffer(ctx) {
+    if (reverbBuffer) return reverbBuffer;
+    const len = Math.floor(ctx.sampleRate * 4);
+    const buf = ctx.createBuffer(2, len, ctx.sampleRate);
+    for (let c = 0; c < 2; c++) {
+      const d = buf.getChannelData(c);
+      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
+    }
+    return (reverbBuffer = buf);
+  }
+
+  // wet/dry bus for one ambient; voices connect to the returned node
+  function makeBus(ctx, out, wet) {
+    const input = ctx.createGain();
+    const dry = ctx.createGain(); dry.gain.value = 1 - wet * 0.5;
+    const rev = ctx.createConvolver(); rev.buffer = getReverbBuffer(ctx);
+    const wetG = ctx.createGain(); wetG.gain.value = wet;
+    input.connect(dry); dry.connect(out);
+    input.connect(rev); rev.connect(wetG); wetG.connect(out);
+    return input;
+  }
+
+  // soft sustained chord: detuned saws through a gentle lowpass, slow swell in
+  // and out; consecutive chords overlap by the attack time, so they crossfade
+  function padChord(ctx, dest, midis, dur, level, cutoff) {
+    const t0 = ctx.currentTime, atk = dur * 0.4;
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass'; filter.frequency.value = cutoff; filter.Q.value = 0.3;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.linearRampToValueAtTime(level, t0 + atk);
+    g.gain.setValueAtTime(level, t0 + dur - atk);
+    g.gain.linearRampToValueAtTime(0.0001, t0 + dur + atk);
+    filter.connect(g); g.connect(dest);
+    midis.forEach(m => [-7, 7].forEach(cents => {
+      const o = ctx.createOscillator();
+      o.type = 'sawtooth'; o.frequency.value = NOTE(m); o.detune.value = cents;
+      o.connect(filter); o.start(t0); o.stop(t0 + dur + atk + 0.1);
+    }));
+  }
+
+  function pianoNote(ctx, dest, midi, vel) {
+    const t0 = ctx.currentTime + 0.01, f = NOTE(midi);
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2400;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.linearRampToValueAtTime(vel, t0 + 0.008);
+    g.gain.exponentialRampToValueAtTime(vel * 0.3, t0 + 0.4);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 3.2);
+    lp.connect(g); g.connect(dest);
+    [[1, 1], [2, 0.35], [3, 0.12]].forEach(([h, a]) => {
+      const o = ctx.createOscillator(); o.frequency.value = f * h;
+      const og = ctx.createGain(); og.gain.value = a;
+      o.connect(og); og.connect(lp); o.start(t0); o.stop(t0 + 3.3);
+    });
+  }
+
+  function bellNote(ctx, dest, midi, vel) {
+    const t0 = ctx.currentTime + 0.01, f = NOTE(midi), dur = 5;
+    const car = ctx.createOscillator(); car.frequency.value = f;
+    const mod = ctx.createOscillator(); mod.frequency.value = f * 3.5;
+    const modG = ctx.createGain();
+    modG.gain.setValueAtTime(f * 1.5, t0);
+    modG.gain.exponentialRampToValueAtTime(f * 0.02, t0 + dur);
+    mod.connect(modG); modG.connect(car.frequency);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.linearRampToValueAtTime(vel, t0 + 0.005);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    car.connect(g); g.connect(dest);
+    car.start(t0); mod.start(t0); car.stop(t0 + dur + 0.1); mod.stop(t0 + dur + 0.1);
+  }
+
+  function softTone(ctx, dest, midi, vel, dur) {
+    const t0 = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain();
+    o.frequency.value = NOTE(midi);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.linearRampToValueAtTime(vel, t0 + dur * 0.4);
+    g.gain.linearRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g); g.connect(dest); o.start(t0); o.stop(t0 + dur + 0.05);
+  }
+
+  // endless voices (drones, noise, LFOs) are registered in h.nodes so they can be stopped
+  function drone(ctx, dest, h, midis, level, type) {
+    const g = ctx.createGain(); g.gain.value = level; g.connect(dest);
+    midis.forEach((m, i) => {
+      const o = ctx.createOscillator(); o.type = type || 'sine';
+      o.frequency.value = NOTE(m); o.detune.value = i % 2 ? 4 : -4;
+      o.connect(g); o.start(); h.nodes.push(o);
+    });
+    return g;
+  }
+
+  function noiseLayer(ctx, dest, h, opt) {
+    const src = ctx.createBufferSource(); src.buffer = makeNoiseBuffer(ctx, opt.noise); src.loop = true;
+    const f = ctx.createBiquadFilter(); f.type = opt.filter; f.frequency.value = opt.freq; f.Q.value = opt.Q || 0.7;
+    const g = ctx.createGain(); g.gain.value = opt.level;
+    src.connect(f); f.connect(g); g.connect(dest); src.start(); h.nodes.push(src);
+    if (opt.swell) { // slow amplitude swell, e.g. waves rolling in
+      const lfo = ctx.createOscillator(); lfo.frequency.value = opt.swell.rate;
+      const lg = ctx.createGain(); lg.gain.value = opt.level * opt.swell.depth;
+      lfo.connect(lg); lg.connect(g.gain); lfo.start(); h.nodes.push(lfo);
+    }
+  }
+
+  // calls fn now and then again every minS..maxS seconds until the ambient stops
+  function repeat(h, fn, minS, maxS) {
+    const step = () => {
+      if (!h.alive) return;
+      fn();
+      h.timers.push(setTimeout(step, rand(minS, maxS) * 1000));
+    };
+    step();
+  }
+
+  const AMBIENTS = [
+    { name: { ru: 'Туманное утро', en: 'Misty morning' }, gain: 1.4, wet: 0.6,
+      build(ctx, out, h) {
+        const chords = [[48, 55, 64, 71], [45, 52, 60, 67, 71], [41, 48, 57, 64], [43, 50, 57, 62]];
+        let i = 0;
+        repeat(h, () => padChord(ctx, out, chords[i++ % chords.length], 9, 0.016, 850), 9, 9);
+        repeat(h, () => pianoNote(ctx, out, pick([72, 74, 76, 79, 81]), 0.035), 4, 8);
+      } },
+    { name: { ru: 'Дождь за окном', en: 'Rain on the window' }, gain: 1, wet: 0.5,
+      build(ctx, out, h) {
+        noiseLayer(ctx, out, h, { noise: 'white', filter: 'highpass', freq: 2500, level: 0.012 });
+        noiseLayer(ctx, out, h, { noise: 'brown', filter: 'lowpass', freq: 900, level: 0.05 });
+        drone(ctx, out, h, [45, 52], 0.02);
+        const scale = [57, 60, 62, 64, 67, 69, 72, 74, 76];
+        repeat(h, () => {
+          const m = pick(scale);
+          pianoNote(ctx, out, m, rand(0.04, 0.07));
+          if (Math.random() < 0.3) setTimeout(() => h.alive && pianoNote(ctx, out, m - pick([3, 5, 7]), 0.035), 250);
+        }, 1.3, 3.5);
+      } },
+    { name: { ru: 'Хрустальный сад', en: 'Crystal garden' }, gain: 1.3, wet: 0.75,
+      build(ctx, out, h) {
+        drone(ctx, out, h, [38, 45, 50], 0.03);
+        repeat(h, () => bellNote(ctx, out, pick([74, 76, 78, 81, 83, 86, 88]), rand(0.02, 0.04)), 1.5, 4);
+      } },
+    { name: { ru: 'Ночной океан', en: 'Night ocean' }, gain: 1, wet: 0.5,
+      build(ctx, out, h) {
+        noiseLayer(ctx, out, h, { noise: 'brown', filter: 'lowpass', freq: 420, level: 0.12, swell: { rate: 0.08, depth: 0.8 } });
+        const chords = [[38, 45, 53, 57, 64], [34, 46, 53, 57, 62], [36, 43, 52, 55, 60], [33, 45, 52, 57, 60]];
+        let i = 0;
+        repeat(h, () => padChord(ctx, out, chords[i++ % chords.length], 12, 0.014, 600), 12, 12);
+      } },
+    { name: { ru: 'Звёздная пыль', en: 'Stardust' }, gain: 1, wet: 0.7,
+      build(ctx, out, h) {
+        const sweep = ctx.createBiquadFilter();
+        sweep.type = 'lowpass'; sweep.frequency.value = 700; sweep.Q.value = 2;
+        sweep.connect(out);
+        drone(ctx, sweep, h, [40, 47, 52, 59], 0.03, 'triangle');
+        const lfo = ctx.createOscillator(); lfo.frequency.value = 0.04;
+        const lg = ctx.createGain(); lg.gain.value = 450;
+        lfo.connect(lg); lg.connect(sweep.frequency); lfo.start(); h.nodes.push(lfo);
+        repeat(h, () => softTone(ctx, out, pick([88, 90, 92, 95, 97, 100]), rand(0.008, 0.016), rand(3, 6)), 1, 3);
+      } }
+  ];
+  const ROTATE_MS = 45000;
+  let audioCtx = null;
+  let musicNodes = null;
+  let rotateTimer = null;
+  let ambientIndex = 0;
+  let musicOn = true;
+  let clicksOn = true;
+  let typeSoundOn = true;
+  let musicVolume = 1;
+  let clicksVolume = 1;
+
+  function ensureAudioCtx() {
+    if (!audioCtx) {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (Ctx) audioCtx = new Ctx();
+    }
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+
+  function makeNoiseBuffer(ctx, kind) {
+    const seconds = 4;
+    const bufferSize = Math.floor(ctx.sampleRate * seconds);
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    if (kind === 'brown') {
+      let last = 0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        last = (last + 0.02 * white) / 1.02;
+        data[i] = last * 3.5;
+      }
+    } else {
+      for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+    }
+    return buffer;
+  }
+
+  function buildAmbientNodes(preset) {
+    const ctx = ensureAudioCtx();
+    if (!ctx) return;
+    try {
+      const master = ctx.createGain();
+      master.gain.setValueAtTime(0.0001, ctx.currentTime);
+      master.gain.linearRampToValueAtTime(preset.gain * musicVolume, ctx.currentTime + 2.5);
+      master.connect(ctx.destination);
+      const h = { alive: true, nodes: [], timers: [] };
+      preset.build(ctx, makeBus(ctx, master, preset.wet), h);
+      musicNodes = { master, stopNodes: h.nodes, handle: h, baseGain: preset.gain };
+      if (el.musicBtn) el.musicBtn.title = t('musicTitle') + ': ' + preset.name[uiLang];
+    } catch (e) {}
+  }
+
+  // live-adjust the volume of whatever ambient is currently playing, without
+  // rebuilding it, so the settings slider responds instantly
+  function applyMusicVolumeLive() {
+    if (!musicNodes || !audioCtx) return;
+    try {
+      const ctx = audioCtx;
+      musicNodes.master.gain.cancelScheduledValues(ctx.currentTime);
+      musicNodes.master.gain.setValueAtTime(musicNodes.baseGain * musicVolume, ctx.currentTime);
+    } catch (e) {}
+  }
+
+  function fadeOutAndStop(nodes) {
+    if (!nodes || !audioCtx) return;
+    nodes.handle.alive = false;
+    nodes.handle.timers.forEach(clearTimeout);
+    try {
+      const ctx = audioCtx;
+      nodes.master.gain.cancelScheduledValues(ctx.currentTime);
+      nodes.master.gain.setValueAtTime(nodes.master.gain.value, ctx.currentTime);
+      nodes.master.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 0.8);
+      setTimeout(() => { try { nodes.stopNodes.forEach(n => n.stop()); } catch (e) {} }, 850);
+      // already-scheduled notes ring out silently; detach the whole graph after them
+      setTimeout(() => { try { nodes.master.disconnect(); } catch (e) {} }, 8000);
+    } catch (e) {}
+  }
+
+  function rotateAmbient() {
+    if (!musicOn || !musicNodes) return;
+    const old = musicNodes;
+    musicNodes = null;
+    fadeOutAndStop(old);
+    ambientIndex = (ambientIndex + 1) % AMBIENTS.length;
+    setTimeout(() => { if (musicOn) buildAmbientNodes(AMBIENTS[ambientIndex]); }, 900);
+  }
+
+  function startMusic() {
+    if (musicNodes) return;
+    buildAmbientNodes(AMBIENTS[ambientIndex]);
+    if (!rotateTimer) rotateTimer = setInterval(rotateAmbient, ROTATE_MS);
+  }
+
+  function stopMusic() {
+    clearInterval(rotateTimer);
+    rotateTimer = null;
+    if (musicNodes) { fadeOutAndStop(musicNodes); musicNodes = null; }
+  }
+
+  function playClick() {
+    if (!clicksOn || clicksVolume <= 0) return;
+    const ctx = ensureAudioCtx();
+    if (!ctx) return;
+    try {
+      const o = ctx.createOscillator();
+      o.type = 'triangle';
+      o.frequency.value = 540;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, ctx.currentTime);
+      g.gain.linearRampToValueAtTime(0.06 * clicksVolume, ctx.currentTime + 0.005);
+      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.09);
+      o.connect(g); g.connect(ctx.destination);
+      o.start();
+      o.stop(ctx.currentTime + 0.1);
+    } catch (e) {}
+  }
+
+  // soft, muffled "cream switch" style thock for each keystroke while typing -
+  // deliberately lower and rounder than the button click above, and quieter.
+  function playTypeSound() {
+    if (!typeSoundOn || clicksVolume <= 0) return;
+    const ctx = ensureAudioCtx();
+    if (!ctx) return;
+    try {
+      const o = ctx.createOscillator();
+      o.type = 'sine';
+      o.frequency.value = 185 + Math.random() * 25;
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 650;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, ctx.currentTime);
+      g.gain.linearRampToValueAtTime(0.05 * clicksVolume, ctx.currentTime + 0.004);
+      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.07);
+      o.connect(filter); filter.connect(g); g.connect(ctx.destination);
+      o.start();
+      o.stop(ctx.currentTime + 0.08);
+    } catch (e) {}
+  }
+
+  // ---------- persistence ----------
+  // v4: progress kept per difficulty tier; v3 (single track) becomes "novice".
+  // store.tier is null until the player picks a difficulty (or takes the test).
+  const STORAGE_KEY = 'skoropis_progress_v4';
+  const OLD_STORAGE_KEY = 'skoropis_progress_v3';
+  function emptyProgress(count) {
+    return {
+      progress: { ru: Array(count).fill(0), en: Array(count).fill(0) },
+      completed: { ru: Array(count).fill(false), en: Array(count).fill(false) },
+      currentLevel: { ru: 1, en: 1 }
+    };
+  }
+  function isTrack(p) { return p && p.progress && p.completed && p.currentLevel; }
+  function loadStore() {
+    let store = null;
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) store = JSON.parse(raw);
+    } catch (e) {}
+    if (!store || typeof store !== 'object' || !store.tiers) {
+      store = { tier: null, recommended: null, tiers: {} };
+      try {
+        const old = JSON.parse(localStorage.getItem(OLD_STORAGE_KEY) || 'null');
+        if (isTrack(old)) { store.tiers.novice = old; store.tier = 'novice'; }
+      } catch (e) {}
+    }
+    TIER_ORDER.forEach(tr => { if (!isTrack(store.tiers[tr])) store.tiers[tr] = emptyProgress(TIERS[tr].levels); });
+    if (store.tier && !TIERS[store.tier]) store.tier = null;
+    return store;
+  }
+  function saveProgress() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(store)); } catch (e) {}
+  }
+
+  const store = loadStore();
+  // these point into store.tiers[tier] and are swapped by applyTier()
+  let progress, completed, currentLevel;
+  function applyTier(tr) {
+    tier = tr;
+    totalLevels = TIERS[tr].levels;
+    ({ progress, completed, currentLevel } = store.tiers[tr]);
+  }
+  applyTier(store.tier || 'novice');
+
+  const SETTINGS_KEY = 'skoropis_settings_v1';
+  function loadSettings() {
+    try {
+      const raw = localStorage.getItem(SETTINGS_KEY);
+      if (!raw) throw new Error('empty');
+      const s = JSON.parse(raw);
+      if (s && typeof s === 'object') return s;
+    } catch (e) {}
+    return {};
+  }
+  function saveSettings() {
+    try {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify({
+        uiLang, musicOn, clicksOn, typeSoundOn, musicVolume, clicksVolume
+      }));
+    } catch (e) {}
+  }
+  const savedSettings = loadSettings();
+  if (savedSettings.uiLang) uiLang = savedSettings.uiLang;
+  if (typeof savedSettings.musicOn === 'boolean') musicOn = savedSettings.musicOn;
+  if (typeof savedSettings.clicksOn === 'boolean') clicksOn = savedSettings.clicksOn;
+  if (typeof savedSettings.typeSoundOn === 'boolean') typeSoundOn = savedSettings.typeSoundOn;
+  if (typeof savedSettings.musicVolume === 'number') musicVolume = savedSettings.musicVolume;
+  if (typeof savedSettings.clicksVolume === 'number') clicksVolume = savedSettings.clicksVolume;
+
+  function isUnlocked(lg, n) {
+    if (n === 1) return true;
+    return !!completed[lg][n - 2];
+  }
+
+  // ---------- dom ----------
+  const el = {
+    text: document.getElementById('text'),
+    field: document.getElementById('field'),
+    input: document.getElementById('hiddenInput'),
+    results: document.getElementById('results'),
+    statWpm: document.getElementById('statWpm'),
+    statAcc: document.getElementById('statAcc'),
+    statTime: document.getElementById('statTime'),
+    progressFill: document.getElementById('progressFill'),
+    gradeBadge: document.getElementById('gradeBadge'),
+    gradeWord: document.getElementById('gradeWord'),
+    resultHeadline: document.getElementById('resultHeadline'),
+    resultWpm: document.getElementById('resultWpm'),
+    resultAcc: document.getElementById('resultAcc'),
+    resultErrors: document.getElementById('resultErrors'),
+    resultFixed: document.getElementById('resultFixed'),
+    lblFixed: document.getElementById('lblFixed'),
+    sparkline: document.getElementById('sparkline'),
+    retryBtn: document.getElementById('retryBtn'),
+    nextLevelBtn: document.getElementById('nextLevelBtn'),
+    langSwitch: document.getElementById('langSwitch'),
+    musicBtn: document.getElementById('musicBtn'),
+    clicksBtn: document.getElementById('clicksBtn'),
+    typeSoundBtn: document.getElementById('typeSoundBtn'),
+    levelsBtn: document.getElementById('levelsBtn'),
+    prevBtn: document.getElementById('prevBtn'),
+    nextBtn: document.getElementById('nextBtn'),
+    levelNum: document.getElementById('levelNum'),
+    levelTag: document.getElementById('levelTag'),
+    modalBackdrop: document.getElementById('modalBackdrop'),
+    modalClose: document.getElementById('modalClose'),
+    modalTitle: document.getElementById('modalTitle'),
+    modalSub: document.getElementById('modalSub'),
+    levelPath: document.getElementById('levelPath'),
+    lblWpm: document.getElementById('lblWpm'),
+    lblAcc: document.getElementById('lblAcc'),
+    lblTime: document.getElementById('lblTime'),
+    lblWpm2: document.getElementById('lblWpm2'),
+    lblAcc2: document.getElementById('lblAcc2'),
+    lblErrors: document.getElementById('lblErrors'),
+    menuOverlay: document.getElementById('menuOverlay'),
+    menuMain: document.getElementById('menuMain'),
+    menuSettings: document.getElementById('menuSettings'),
+    menuExited: document.getElementById('menuExited'),
+    menuPlayBtn: document.getElementById('menuPlayBtn'),
+    menuSettingsBtn: document.getElementById('menuSettingsBtn'),
+    menuExitBtn: document.getElementById('menuExitBtn'),
+    menuBackBtn: document.getElementById('menuBackBtn'),
+    settingsTitle: document.getElementById('settingsTitle'),
+    settingsLangLabel: document.getElementById('settingsLangLabel'),
+    settingsMusicLabel: document.getElementById('settingsMusicLabel'),
+    settingsClicksLabel: document.getElementById('settingsClicksLabel'),
+    exitedTitle: document.getElementById('exitedTitle'),
+    exitedText: document.getElementById('exitedText'),
+    uiLangSwitch: document.getElementById('uiLangSwitch'),
+    musicVolumeSlider: document.getElementById('musicVolumeSlider'),
+    clicksVolumeSlider: document.getElementById('clicksVolumeSlider'),
+    menuDifficultyBtn: document.getElementById('menuDifficultyBtn'),
+    menuDifficulty: document.getElementById('menuDifficulty'),
+    menuTiers: document.getElementById('menuTiers'),
+    difficultyTitle: document.getElementById('difficultyTitle'),
+    difficultyText: document.getElementById('difficultyText'),
+    chooseSelfBtn: document.getElementById('chooseSelfBtn'),
+    takeTestBtn: document.getElementById('takeTestBtn'),
+    difficultyBackBtn: document.getElementById('difficultyBackBtn'),
+    tiersTitle: document.getElementById('tiersTitle'),
+    tierList: document.getElementById('tierList'),
+    tiersBackBtn: document.getElementById('tiersBackBtn'),
+    testResults: document.getElementById('testResults'),
+    testHeadline: document.getElementById('testHeadline'),
+    testTier: document.getElementById('testTier'),
+    testReason: document.getElementById('testReason'),
+    testCpm: document.getElementById('testCpm'),
+    testAcc: document.getElementById('testAcc'),
+    testErrors: document.getElementById('testErrors'),
+    lblTestCpm: document.getElementById('lblTestCpm'),
+    lblTestAcc: document.getElementById('lblTestAcc'),
+    lblTestErrors: document.getElementById('lblTestErrors'),
+    testRetryBtn: document.getElementById('testRetryBtn'),
+    testChooseBtn: document.getElementById('testChooseBtn'),
+    testStartBtn: document.getElementById('testStartBtn')
+  };
+
+  function applyStaticTranslations() {
+    el.musicBtn.title = t('musicTitle');
+    el.clicksBtn.title = t('clicksTitle');
+    el.typeSoundBtn.title = t('typeSoundTitle');
+    el.levelsBtn.textContent = t('levelsBtn');
+    el.prevBtn.setAttribute('aria-label', t('prevLevel'));
+    el.nextBtn.setAttribute('aria-label', t('nextLevel'));
+    el.lblWpm.textContent = t('statWpm');
+    el.lblAcc.textContent = t('statAcc');
+    el.lblTime.textContent = t('statTime');
+    el.lblWpm2.textContent = t('statWpm');
+    el.lblAcc2.textContent = t('statAcc');
+    el.lblErrors.textContent = t('statErrors');
+    el.lblFixed.textContent = t('statFixed');
+    el.retryBtn.textContent = t('retryBtn');
+    el.nextLevelBtn.textContent = t('nextLevelBtn');
+    el.modalTitle.textContent = t('modalTitle');
+    el.modalSub.textContent = t('modalSub');
+    el.menuPlayBtn.textContent = t('menuPlay');
+    el.menuSettingsBtn.textContent = t('menuSettings');
+    el.menuExitBtn.textContent = t('menuExit');
+    el.settingsTitle.textContent = t('settingsTitle');
+    el.settingsLangLabel.textContent = t('settingsLangLabel');
+    el.settingsMusicLabel.textContent = t('settingsMusicLabel');
+    el.settingsClicksLabel.textContent = t('settingsClicksLabel');
+    el.menuBackBtn.textContent = t('backBtn');
+    el.exitedTitle.textContent = t('exitedTitle');
+    el.exitedText.textContent = t('exitedText');
+    el.menuDifficultyBtn.textContent = t('menuDifficulty');
+    el.difficultyTitle.textContent = t('difficultyTitle');
+    el.difficultyText.textContent = t('difficultyText');
+    el.chooseSelfBtn.textContent = t('chooseSelf');
+    el.takeTestBtn.textContent = t('takeTest');
+    el.difficultyBackBtn.textContent = t('backBtn');
+    el.tiersTitle.textContent = t('tiersTitle');
+    el.tiersBackBtn.textContent = t('backBtn');
+    el.testHeadline.textContent = t('testHeadline');
+    el.lblTestCpm.textContent = t('statWpm');
+    el.lblTestAcc.textContent = t('statAcc');
+    el.lblTestErrors.textContent = t('statErrors');
+    el.testRetryBtn.textContent = t('testRetry');
+    el.testChooseBtn.textContent = t('testChoose');
+    el.testStartBtn.textContent = t('testStart');
+    if (testRec) {
+      el.testTier.textContent = t('tier_' + testRec.tier);
+      el.testReason.textContent = t(testRec.reason);
+    }
+    renderTierList();
+  }
+
+  let lang = 'ru';
+  let targetText = '';
+  let currentGen = null;
+  let currentLines = null;
+  let charEls = [];
+  let startTime = null;
+  let tickTimer = null;
+  let finished = false;
+  let correctCount = 0;
+  let correctLetters = 0; // correct non-space characters, used for speed
+  let incorrectCount = 0;
+  let totalKeystrokes = 0;
+  let errorCount = 0;
+  let cpmHistory = [];
+  let lastInputLen = 0;
+  let acceptedValue = '';  // last input value that passed the edit check
+  let firstCharCorrect = false; // the keystroke that started the clock
+  let testMode = false;    // the skill test is running instead of a level
+  let testRec = null;      // { tier, reason } from the last finished test
+  let specialTotal = 0;    // keystrokes on capitals/digits/punctuation (for the test)
+  let specialErrors = 0;
+  const errorPositions = new Set(); // positions where a typo was made (maybe fixed later)
+  const levelCache = {};   // [tier][lang][n] -> generated level
+  TIER_ORDER.forEach(tr => { levelCache[tr] = { ru: {}, en: {} }; });
+
+  // Renders characters into <span class="char"> cells. Each word goes into a
+  // nowrap group, and only the spaces between words are wrappable, so a word
+  // is never broken in the middle when a row is wider than the screen.
+  function renderCharsInto(container, str) {
+    let word = null;
+    for (const ch of str) {
+      const span = document.createElement('span');
+      span.className = 'char';
+      span.textContent = ch;
+      if (ch === ' ') {
+        span.classList.add('sp');
+        container.appendChild(span);
+        word = null;
+      } else {
+        if (!word) { word = document.createElement('span'); word.className = 'word'; container.appendChild(word); }
+        word.appendChild(span);
+      }
+      charEls.push(span);
+    }
+  }
+
+  // Keeps everything inside the window. Levels differ a lot in how much text
+  // they show, so the type size - and if that is not enough, the keyboard -
+  // are shrunk step by step until the text AND the keyboard fit on screen.
+  function applySizes(textPx, keyPx) {
+    el.text.style.fontSize = textPx + 'px';
+    const r = document.documentElement.style;
+    r.setProperty('--key-size', keyPx + 'px');
+    r.setProperty('--key-gap', Math.max(2, Math.round(keyPx * 0.16)) + 'px');
+    r.setProperty('--key-font', Math.max(8, Math.round(keyPx * 0.38)) + 'px');
+    if (typeof layoutHands === 'function') layoutHands();
+  }
+
+  function fitLayout() {
+    const narrow = window.innerWidth <= 480;
+    document.body.classList.toggle('compact', window.innerHeight < 780 || narrow);
+    let textPx = narrow ? 17 : 21;
+    let keyPx = narrow ? 22 : 32;
+    applySizes(textPx, keyPx);
+    // the keyboard must also fit across: shrink the keys until no row overflows
+    const kbEl = document.getElementById('keyboard');
+    const tooWide = () => kbEl.clientWidth > 0 && [...kbEl.querySelectorAll('.kb-row')].some(r => r.scrollWidth > kbEl.clientWidth + 1);
+    let wGuard = 40;
+    while (tooWide() && keyPx > 12 && wGuard-- > 0) { keyPx -= 1; applySizes(textPx, keyPx); }
+    const fits = () => document.documentElement.scrollHeight <= window.innerHeight;
+    let guard = 60;
+    while (!fits() && guard-- > 0) {
+      if (textPx > 11) textPx -= 1;        // text first: it is the biggest block
+      else if (keyPx > 13) keyPx -= 1;     // then the keyboard (hands shrink with it)
+      else break;
+      applySizes(textPx, keyPx);
+    }
+  }
+  window.addEventListener('resize', () => requestAnimationFrame(fitLayout));
+
+  function renderText() {
+    el.text.innerHTML = '';
+    charEls = [];
+    if (currentLines) {
+      // render each drill line as its own centered row, rather than relying
+      // on the browser to wrap one long string (which could break unevenly
+      // and look off-center)
+      currentLines.forEach(lineStr => {
+        const row = document.createElement('div');
+        row.className = 'text-line';
+        renderCharsInto(row, lineStr + ' ');
+        el.text.appendChild(row);
+      });
+    } else {
+      renderCharsInto(el.text, targetText);
+    }
+    if (charEls.length) charEls[0].classList.add('current');
+  }
+
+  function updateLevelbar() {
+    if (testMode) {
+      el.levelNum.textContent = t('testLevel');
+      el.levelTag.textContent = tagFor(currentGen);
+      el.prevBtn.disabled = true;
+      el.nextBtn.disabled = true;
+      return;
+    }
+    const n = currentLevel[lang];
+    el.levelNum.textContent = t('tier_' + tier) + ' · ' + t('levelWord') + ' ' + n + ' ' + t('ofWord') + ' ' + totalLevels;
+    el.levelTag.textContent = tagFor(currentGen);
+    el.prevBtn.disabled = n <= 1;
+    el.nextBtn.disabled = !(n < totalLevels && isUnlocked(lang, n + 1));
+  }
+
+  function loadLevel(n) {
+    testMode = false;
+    currentLevel[lang] = n;
+    // a level's words/letters are generated once and cached, so restarting
+    // with Tab (or revisiting the level later) keeps the same content -
+    // only the typed progress and timer reset.
+    const cache = levelCache[tier][lang];
+    let gen = cache[n];
+    if (!gen) { gen = generateLevel(n, lang); cache[n] = gen; }
+    startRun(gen);
+    saveProgress();
+  }
+
+  function loadTest() {
+    testMode = true;
+    const lines = wrapLines(TEST_TEXT[lang]);
+    startRun({ text: lines.join(' ') + ' ', lines, kind: 'test' });
+  }
+
+  // resets the typing state and shows gen's text (a level or the test)
+  function startRun(gen) {
+    clearInterval(tickTimer);
+    specialTotal = 0;
+    specialErrors = 0;
+    errorPositions.clear();
+    el.testResults.classList.remove('visible');
+    document.body.classList.remove('results-open');
+    targetText = gen.text;
+    currentGen = gen;
+    currentLines = gen.lines || null;
+    startTime = null;
+    finished = false;
+    correctCount = 0;
+    correctLetters = 0;
+    incorrectCount = 0;
+    totalKeystrokes = 0;
+    errorCount = 0;
+    cpmHistory = [];
+    lastInputLen = 0;
+    acceptedValue = '';
+    firstCharCorrect = false;
+    el.input.value = '';
+    el.results.classList.remove('visible');
+    el.field.classList.remove('blurred');
+    el.statWpm.textContent = '0';
+    el.statAcc.textContent = '100%';
+    el.statTime.textContent = '0с';
+    el.progressFill.style.width = '0%';
+    renderText();
+    fitLayout();
+    updateLevelbar();
+    highlightNextChar(targetText[0]);
+    focusInput();
+  }
+
+  function currentCpm() {
+    if (!startTime) return 0;
+    const elapsedMs = performance.now() - startTime;
+    // right after the very first keystroke the elapsed time is tiny, so the
+    // rate explodes into an absurd number - hide the estimate until enough
+    // time has passed to be meaningful.
+    if (elapsedMs < 1000) return 0;
+    const minutes = elapsedMs / 60000;
+    // only letters/punctuation count toward speed, spaces don't - otherwise
+    // drills like "о о о о" (half spaces) show inflated numbers.
+    // the clock starts ON the first keystroke, so that character took no
+    // measured time - counting it would inflate the rate (hugely at the start)
+    const timed = Math.max(0, correctLetters - (firstCharCorrect ? 1 : 0));
+    return Math.round(timed / minutes);
+  }
+
+  function currentAccuracy() {
+    if (totalKeystrokes === 0) return 100;
+    const correct = totalKeystrokes - errorCount;
+    return Math.round((correct / totalKeystrokes) * 100);
+  }
+
+  function updateStatsLive() {
+    el.statWpm.textContent = String(currentCpm());
+    el.statAcc.textContent = currentAccuracy() + '%';
+    if (startTime) el.statTime.textContent = Math.floor((performance.now() - startTime) / 1000) + 'с';
+    const pct = targetText.length ? Math.min(100, Math.round((el.input.value.length / targetText.length) * 100)) : 0;
+    el.progressFill.style.width = pct + '%';
+  }
+
+  function startTicking() {
+    startTime = performance.now();
+    tickTimer = setInterval(() => { cpmHistory.push(currentCpm()); updateStatsLive(); }, 500);
+  }
+
+  function drawSparkline(data) {
+    const w = 320, h = 52, pad = 4;
+    const max = Math.max(1, ...data);
+    const stepX = data.length > 1 ? (w - pad * 2) / (data.length - 1) : 0;
+    let d = '';
+    data.forEach((v, i) => {
+      const x = pad + i * stepX;
+      const y = h - pad - (v / max) * (h - pad * 2);
+      d += (i === 0 ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1) + ' ';
+    });
+    el.sparkline.innerHTML = '<path d="' + d.trim() + '" fill="none" stroke="#b08d4f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+  }
+
+  function finish() {
+    if (finished) return;
+    finished = true;
+    clearInterval(tickTimer);
+    el.field.classList.add('blurred');
+    clearKeyboardHighlight();
+    const cpm = currentCpm();
+    const acc = currentAccuracy();
+    if (testMode) { finishTest(cpm, acc); return; }
+    const n = currentLevel[lang];
+    const grade = gradeFor(n, cpm, acc);
+    progress[lang][n - 1] = Math.max(progress[lang][n - 1], grade);
+    completed[lang][n - 1] = true;
+    saveProgress();
+
+    el.gradeBadge.className = 'grade-badge grade-' + grade;
+    el.gradeBadge.textContent = String(grade);
+    el.gradeWord.textContent = t('grade' + grade);
+    el.resultHeadline.textContent = n === totalLevels ? t('finalPassed') : t('levelPassed').replace('%n', n);
+    el.resultWpm.textContent = String(cpm);
+    el.resultAcc.textContent = acc + '%';
+    // a typo counts as fixed when that cell ended up holding the right character
+    const typed = el.input.value;
+    let fixed = 0;
+    errorPositions.forEach(i => { if (typed[i] === targetText[i]) fixed++; });
+    el.resultErrors.textContent = String(errorCount);
+    el.resultFixed.textContent = String(fixed);
+    el.results.classList.add('visible');
+    document.body.classList.add('results-open');
+    fitLayout();
+    drawSparkline(cpmHistory.length ? cpmHistory : [cpm]);
+    el.nextLevelBtn.style.display = n < totalLevels ? 'inline-flex' : 'none';
+    updateLevelbar();
+  }
+
+  function finishTest(cpm, acc) {
+    const specialAcc = specialTotal ? Math.round((specialTotal - specialErrors) / specialTotal * 100) : 100;
+    testRec = recommendTier(cpm, acc, specialAcc);
+    store.recommended = testRec.tier;
+    saveProgress();
+    el.testTier.textContent = t('tier_' + testRec.tier);
+    el.testReason.textContent = t(testRec.reason);
+    el.testCpm.textContent = String(cpm);
+    el.testAcc.textContent = acc + '%';
+    el.testErrors.textContent = String(errorCount);
+    el.testResults.classList.add('visible');
+    document.body.classList.add('results-open');
+    fitLayout();
+    updateLevelbar();
+  }
+
+  // switches to a difficulty tier and jumps to its first unpassed level
+  function startTier(tr) {
+    applyTier(tr);
+    store.tier = tr;
+    pauseStartTs = null;
+    el.menuOverlay.classList.remove('visible');
+    loadLevel(getNextLevel(lang));
+  }
+
+  function startTestFromMenu() {
+    pauseStartTs = null;
+    el.menuOverlay.classList.remove('visible');
+    loadTest();
+  }
+
+  function renderTierList() {
+    el.tierList.innerHTML = '';
+    TIER_ORDER.forEach(tr => {
+      const done = store.tiers[tr].completed[lang].filter(Boolean).length;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'menu-btn tier-btn' + (store.tier === tr ? ' active' : '');
+      const head = document.createElement('span');
+      head.className = 'tier-head';
+      const name = document.createElement('span');
+      name.className = 'tier-name';
+      name.textContent = t('tier_' + tr);
+      if (store.recommended === tr) {
+        const badge = document.createElement('span');
+        badge.className = 'tier-badge';
+        badge.textContent = t('recommended');
+        name.appendChild(badge);
+      }
+      const meta = document.createElement('span');
+      meta.className = 'tier-meta';
+      meta.textContent = done + ' / ' + TIERS[tr].levels;
+      head.appendChild(name);
+      head.appendChild(meta);
+      const desc = document.createElement('span');
+      desc.className = 'tier-desc';
+      desc.textContent = t('tierDesc_' + tr);
+      btn.appendChild(head);
+      btn.appendChild(desc);
+      btn.addEventListener('click', () => { playClick(); startTier(tr); });
+      el.tierList.appendChild(btn);
+    });
+  }
+
+  function handleInput() {
+    if (finished) return;
+    let value = el.input.value;
+    // the input keeps focus under the pause menu / level map, but the clock
+    // is stopped there - keystrokes typed meanwhile must not count
+    if (menuIsOpen() || modalOpen()) {
+      el.input.value = acceptedValue;
+      return;
+    }
+    // typos may be erased from the end (backspace) and retyped - but they were
+    // already counted when made, so fixing them doesn't restore accuracy.
+    // Only two edits are allowed: delete from the end, or add ONE char at the
+    // end. Anything else (paste, drop, autocomplete, typing after moving the
+    // caret back) would fake the speed or skip text - reject it.
+    const deletedFromEnd = value.length < acceptedValue.length && acceptedValue.startsWith(value);
+    const addedOne = value.length === acceptedValue.length + 1 && value.startsWith(acceptedValue);
+    if (!deletedFromEnd && !addedOne) {
+      el.input.value = acceptedValue;
+      el.input.setSelectionRange(acceptedValue.length, acceptedValue.length);
+      return;
+    }
+    if (!startTime && value.length > 0) {
+      firstCharCorrect = value[0] === targetText[0];
+      startTicking();
+    }
+    if (value.length > lastInputLen) {
+      // count a mistake the moment it happens, not just what's left uncorrected
+      // when the level ends (so fixing a typo with backspace doesn't erase it)
+      for (let i = lastInputLen; i < value.length; i++) {
+        totalKeystrokes++;
+        const special = isSpecialChar(targetText[i] || '');
+        if (special) specialTotal++;
+        if (value[i] !== targetText[i]) {
+          errorCount++; errorPositions.add(i);
+          if (special) specialErrors++;
+        }
+      }
+      playTypeSound();
+      pressHands();
+    }
+    lastInputLen = value.length;
+    acceptedValue = value;
+
+    correctCount = 0;
+    correctLetters = 0;
+    incorrectCount = 0;
+    const len = Math.min(value.length, targetText.length);
+    for (let i = 0; i < charEls.length; i++) charEls[i].classList.remove('correct', 'incorrect', 'mark', 'current');
+    for (let i = 0; i < len; i++) {
+      if (value[i] === targetText[i]) {
+        charEls[i].classList.add('correct'); correctCount++;
+        if (i === len - 1 && targetText[i] !== ' ') charEls[i].classList.add('mark');
+        if (targetText[i] !== ' ') correctLetters++;
+      }
+      else {
+        charEls[i].classList.add('incorrect'); incorrectCount++;
+        if (i === len - 1 || targetText[i] === ' ') charEls[i].classList.add('mark');
+      }
+    }
+    if (charEls[len]) charEls[len].classList.add('current');
+    updateStatsLive();
+    highlightNextChar(targetText[len], targetText[len - 1]);
+    if (value.length >= targetText.length) finish();
+  }
+
+  function modalOpen() { return el.modalBackdrop.classList.contains('visible'); }
+
+  function focusInput() {
+    if (!finished && !modalOpen() && !menuIsOpen()) el.input.focus();
+  }
+
+  // ---------- level path (game-style circle map) ----------
+  function buildLevelPath() {
+    const container = el.levelPath;
+    container.innerHTML = '';
+    const spacing = 68;
+    const topPad = 30;
+    container.style.height = (topPad * 2 + (totalLevels - 1) * spacing + 48) + 'px';
+    for (let n = 1; n <= totalLevels; n++) {
+      const y = topPad + (n - 1) * spacing;
+      const offset = Math.round(Math.sin(n * 0.45) * 55);
+      const node = document.createElement('button');
+      node.type = 'button';
+      node.className = 'level-node';
+      node.style.top = y + 'px';
+      node.style.transform = 'translate(calc(-50% + ' + offset + 'px), 0)';
+      const unlocked = isUnlocked(lang, n);
+      if (n === currentLevel[lang]) node.classList.add('current');
+      if (!unlocked) {
+        node.classList.add('locked');
+        node.disabled = true;
+        node.innerHTML = '<span class="lock-icon">🔒</span>';
+      } else {
+        node.innerHTML = '<span>' + n + '</span>';
+        const g = progress[lang][n - 1];
+        if (g > 0) {
+          const dot = document.createElement('span');
+          dot.className = 'grade-dot grade-' + g;
+          dot.textContent = String(g);
+          node.appendChild(dot);
+        }
+        node.addEventListener('click', () => { playClick(); loadLevel(n); closeModal(); });
+      }
+      container.appendChild(node);
+    }
+  }
+  function openModal() {
+    el.modalTitle.textContent = t('modalTitle') + ' · ' + t('tier_' + tier);
+    buildLevelPath();
+    el.modalBackdrop.classList.add('visible');
+  }
+  function closeModal() { el.modalBackdrop.classList.remove('visible'); focusInput(); }
+
+  // ---------- main menu (play / settings / exit) ----------
+  let pauseStartTs = null;
+
+  function getNextLevel(lg) {
+    for (let i = 1; i <= totalLevels; i++) if (!completed[lg][i - 1]) return i;
+    return totalLevels;
+  }
+
+  function menuIsOpen() { return el.menuOverlay.classList.contains('visible'); }
+
+  function showMenuView(view) {
+    el.menuMain.hidden = view !== 'main';
+    el.menuSettings.hidden = view !== 'settings';
+    el.menuExited.hidden = view !== 'exited';
+    el.menuDifficulty.hidden = view !== 'difficulty';
+    el.menuTiers.hidden = view !== 'tiers';
+    if (view === 'tiers') renderTierList();
+  }
+
+  function openMenu(view) {
+    showMenuView(view || 'main');
+    el.menuOverlay.classList.add('visible');
+    el.input.blur();
+    if (startTime && !finished && !pauseStartTs) {
+      clearInterval(tickTimer);
+      pauseStartTs = performance.now();
+    }
+  }
+
+  // closes the overlay and resumes exactly where the player paused - used
+  // when they just dismiss the menu rather than pressing "Играть"
+  function closeMenuResume() {
+    el.menuOverlay.classList.remove('visible');
+    if (pauseStartTs !== null) {
+      if (startTime && !finished) {
+        startTime += performance.now() - pauseStartTs;
+        tickTimer = setInterval(() => { cpmHistory.push(currentCpm()); updateStatsLive(); }, 500);
+      }
+      pauseStartTs = null;
+    }
+    focusInput();
+  }
+
+  function startFrontierLevel() {
+    pauseStartTs = null;
+    el.menuOverlay.classList.remove('visible');
+    loadLevel(getNextLevel(lang));
+  }
+
+  // first time (no difficulty chosen yet) "Играть" asks: choose yourself or take the test
+  el.menuPlayBtn.addEventListener('click', () => {
+    playClick();
+    if (store.tier) startFrontierLevel(); else showMenuView('difficulty');
+  });
+  el.menuDifficultyBtn.addEventListener('click', () => { playClick(); showMenuView('difficulty'); });
+  el.chooseSelfBtn.addEventListener('click', () => { playClick(); showMenuView('tiers'); });
+  el.takeTestBtn.addEventListener('click', () => { playClick(); startTestFromMenu(); });
+  el.difficultyBackBtn.addEventListener('click', () => { playClick(); showMenuView('main'); });
+  el.tiersBackBtn.addEventListener('click', () => { playClick(); showMenuView('difficulty'); });
+  el.testRetryBtn.addEventListener('click', () => { playClick(); loadTest(); });
+  el.testChooseBtn.addEventListener('click', () => { playClick(); openMenu('tiers'); });
+  el.testStartBtn.addEventListener('click', () => { playClick(); if (testRec) startTier(testRec.tier); });
+  el.menuSettingsBtn.addEventListener('click', () => { playClick(); showMenuView('settings'); });
+  el.menuBackBtn.addEventListener('click', () => { playClick(); showMenuView('main'); });
+  el.menuExitBtn.addEventListener('click', () => {
+    playClick();
+    clearInterval(tickTimer);
+    pauseStartTs = null;
+    stopMusic();
+    showMenuView('exited');
+    // best effort: browsers only actually allow closing tabs/windows that
+    // script itself opened, so this silently does nothing in most cases -
+    // the "exited" screen and its message are the honest fallback for that.
+    try { window.close(); } catch (e) {}
+  });
+
+  el.levelsBtn.addEventListener('click', () => { playClick(); openModal(); });
+  el.modalClose.addEventListener('click', () => { playClick(); closeModal(); });
+  el.modalBackdrop.addEventListener('click', (e) => { if (e.target === el.modalBackdrop) closeModal(); });
+
+  el.field.addEventListener('click', focusInput);
+  el.input.addEventListener('input', handleInput);
+  el.input.addEventListener('paste', e => e.preventDefault());
+  el.input.addEventListener('drop', e => e.preventDefault());
+  el.input.addEventListener('blur', () => {
+    if (!finished) setTimeout(() => { if (!finished && !modalOpen() && !menuIsOpen()) el.input.focus(); }, 20);
+  });
+
+  el.retryBtn.addEventListener('click', () => { playClick(); loadLevel(currentLevel[lang]); });
+  el.nextLevelBtn.addEventListener('click', () => {
+    playClick();
+    const n = currentLevel[lang];
+    if (n < totalLevels && isUnlocked(lang, n + 1)) loadLevel(n + 1);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (modalOpen()) { closeModal(); return; }
+      if (menuIsOpen()) { if (!el.menuExited.hidden) return; closeMenuResume(); }
+      else { playClick(); openMenu('main'); }
+      return;
+    }
+    if (modalOpen() || menuIsOpen()) return;
+    if (e.key === 'Tab') {
+      e.preventDefault(); playClick();
+      if (testMode) loadTest(); else loadLevel(currentLevel[lang]);
+    } else if (e.key === 'Enter' && finished) {
+      e.preventDefault();
+      if (testMode) { if (testRec) { playClick(); startTier(testRec.tier); } return; }
+      const n = currentLevel[lang];
+      if (n < totalLevels && isUnlocked(lang, n + 1)) { playClick(); loadLevel(n + 1); }
+    }
+  });
+
+  el.langSwitch.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-lang]');
+    if (!btn) return;
+    playClick();
+    lang = btn.dataset.lang;
+    [...el.langSwitch.children].forEach(b => b.classList.toggle('active', b === btn));
+    buildKeyboard(lang);
+    if (testMode) loadTest(); else loadLevel(currentLevel[lang]);
+  });
+
+  el.prevBtn.addEventListener('click', () => {
+    playClick();
+    const n = currentLevel[lang];
+    if (n > 1) loadLevel(n - 1);
+  });
+  el.nextBtn.addEventListener('click', () => {
+    playClick();
+    const n = currentLevel[lang];
+    if (n < totalLevels && isUnlocked(lang, n + 1)) loadLevel(n + 1);
+  });
+
+  el.musicBtn.addEventListener('click', () => {
+    playClick();
+    musicOn = !musicOn;
+    el.musicBtn.classList.toggle('off', !musicOn);
+    el.musicBtn.setAttribute('aria-pressed', String(musicOn));
+    if (musicOn) startMusic(); else stopMusic();
+    saveSettings();
+  });
+  el.clicksBtn.addEventListener('click', () => {
+    clicksOn = !clicksOn;
+    el.clicksBtn.classList.toggle('off', !clicksOn);
+    el.clicksBtn.setAttribute('aria-pressed', String(clicksOn));
+    if (clicksOn) playClick();
+    saveSettings();
+  });
+  el.typeSoundBtn.addEventListener('click', () => {
+    playClick();
+    typeSoundOn = !typeSoundOn;
+    el.typeSoundBtn.classList.toggle('off', !typeSoundOn);
+    el.typeSoundBtn.setAttribute('aria-pressed', String(typeSoundOn));
+    if (typeSoundOn) playTypeSound();
+    saveSettings();
+  });
+
+  el.uiLangSwitch.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-uilang]');
+    if (!btn) return;
+    playClick();
+    uiLang = btn.dataset.uilang;
+    [...el.uiLangSwitch.children].forEach(b => b.classList.toggle('active', b === btn));
+    applyStaticTranslations();
+    updateLevelbar();
+    saveSettings();
+  });
+
+  el.musicVolumeSlider.addEventListener('input', () => {
+    musicVolume = Number(el.musicVolumeSlider.value) / 100;
+    applyMusicVolumeLive();
+    saveSettings();
+  });
+  el.clicksVolumeSlider.addEventListener('input', () => {
+    clicksVolume = Number(el.clicksVolumeSlider.value) / 100;
+  });
+  el.clicksVolumeSlider.addEventListener('change', () => { playClick(); saveSettings(); });
+
+  function firstInteraction() {
+    ensureAudioCtx();
+    if (musicOn && !musicNodes) startMusic();
+    document.removeEventListener('pointerdown', firstInteraction);
+    document.removeEventListener('keydown', firstInteraction);
+  }
+  document.addEventListener('pointerdown', firstInteraction);
+  document.addEventListener('keydown', firstInteraction);
+
+  // ---------- apply loaded settings to the actual controls ----------
+  el.musicBtn.classList.toggle('off', !musicOn);
+  el.musicBtn.setAttribute('aria-pressed', String(musicOn));
+  el.clicksBtn.classList.toggle('off', !clicksOn);
+  el.clicksBtn.setAttribute('aria-pressed', String(clicksOn));
+  el.typeSoundBtn.classList.toggle('off', !typeSoundOn);
+  el.typeSoundBtn.setAttribute('aria-pressed', String(typeSoundOn));
+  el.musicVolumeSlider.value = String(Math.round(musicVolume * 100));
+  el.clicksVolumeSlider.value = String(Math.round(clicksVolume * 100));
+  [...el.uiLangSwitch.children].forEach(b => b.classList.toggle('active', b.dataset.uilang === uiLang));
+  applyStaticTranslations();
+
+  buildKeyboard(lang);
+  loadLevel(currentLevel[lang]);
+  if (musicOn) startMusic();
+
+  // the menu is a separate "page" shown right on entry - Играть jumps into
+  // the level the player still needs to pass to advance. Delay a tick so the
+  // browser paints the hidden state first and the fade-in actually animates.
+  requestAnimationFrame(() => requestAnimationFrame(() => openMenu('main')));
+})();
+</script>
+</body>
+</html>
